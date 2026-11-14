@@ -233,6 +233,8 @@ namespace UclOpenCoenBehaviourBox
     
         private System.Collections.Generic.Dictionary<string, SpinnakerCamera> _camera;
     
+        private VideoEncoder _videoEncoder;
+    
         public BehaviourBoxRig()
         {
             _behaviorBoard = new System.Collections.Generic.Dictionary<string, BehaviorBoard>();
@@ -245,6 +247,7 @@ namespace UclOpenCoenBehaviourBox
             _rigId = other._rigId;
             _behaviorBoard = other._behaviorBoard;
             _camera = other._camera;
+            _videoEncoder = other._videoEncoder;
         }
     
         /// <summary>
@@ -325,6 +328,25 @@ namespace UclOpenCoenBehaviourBox
             }
         }
     
+        /// <summary>
+        /// How the cameras' video is encoded; left out: libx264 and the ffmpeg.exe on PATH.
+        /// </summary>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        [Newtonsoft.Json.JsonPropertyAttribute("videoEncoder")]
+        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="videoEncoder")]
+        [System.ComponentModel.DescriptionAttribute("How the cameras\' video is encoded; left out: libx264 and the ffmpeg.exe on PATH.")]
+        public VideoEncoder VideoEncoder
+        {
+            get
+            {
+                return _videoEncoder;
+            }
+            set
+            {
+                _videoEncoder = value;
+            }
+        }
+    
         public System.IObservable<BehaviourBoxRig> Generate()
         {
             return System.Reactive.Linq.Observable.Defer(() => System.Reactive.Linq.Observable.Return(new BehaviourBoxRig(this)));
@@ -340,7 +362,8 @@ namespace UclOpenCoenBehaviourBox
             stringBuilder.Append("RootPath = " + _rootPath + ", ");
             stringBuilder.Append("RigId = " + _rigId + ", ");
             stringBuilder.Append("BehaviorBoard = " + _behaviorBoard + ", ");
-            stringBuilder.Append("Camera = " + _camera);
+            stringBuilder.Append("Camera = " + _camera + ", ");
+            stringBuilder.Append("VideoEncoder = " + _videoEncoder);
             return true;
         }
     
@@ -2271,6 +2294,104 @@ namespace UclOpenCoenBehaviourBox
 
 
     /// <summary>
+    /// How this machine encodes its cameras' video: OpenRigs.Video's FfmpegVideoWriter (OpenRigs.Logging's LogVideoFfmpeg)
+    ///reads it at Start. The encoder is the machine's, so it is one setting for every camera.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Bonsai.Sgen", "0.7.2.0 (Newtonsoft.Json v13.0.0.0, YamlDotNet v16.0.0.0)")]
+    [System.ComponentModel.DescriptionAttribute("How this machine encodes its cameras\' video: OpenRigs.Video\'s FfmpegVideoWriter (" +
+        "OpenRigs.Logging\'s LogVideoFfmpeg)\nreads it at Start. The encoder is the machine" +
+        "\'s, so it is one setting for every camera.")]
+    [Bonsai.WorkflowElementCategoryAttribute(Bonsai.ElementCategory.Source)]
+    [Bonsai.CombinatorAttribute(MethodName="Generate")]
+    public partial class VideoEncoder
+    {
+    
+        private VideoEncoderCodec _codec;
+    
+        private string _ffmpegPath;
+    
+        public VideoEncoder()
+        {
+            _codec = VideoEncoderCodec.Libx264;
+        }
+    
+        protected VideoEncoder(VideoEncoder other)
+        {
+            _codec = other._codec;
+            _ffmpegPath = other._ffmpegPath;
+        }
+    
+        /// <summary>
+        /// The FFmpeg H.264 encoder: h264_nvenc on an NVIDIA GPU, h264_qsv on Intel Quick Sync, libx264 (software, the default) on any machine with the cores for it.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("codec")]
+        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="codec")]
+        [System.ComponentModel.DescriptionAttribute("The FFmpeg H.264 encoder: h264_nvenc on an NVIDIA GPU, h264_qsv on Intel Quick Sy" +
+            "nc, libx264 (software, the default) on any machine with the cores for it.")]
+        public VideoEncoderCodec Codec
+        {
+            get
+            {
+                return _codec;
+            }
+            set
+            {
+                _codec = value;
+            }
+        }
+    
+        /// <summary>
+        /// The full path of ffmpeg.exe. Left out: the first ffmpeg.exe on PATH. The workflow stops at Start when neither is there.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ffmpegPath")]
+        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="ffmpegPath")]
+        [System.ComponentModel.DescriptionAttribute("The full path of ffmpeg.exe. Left out: the first ffmpeg.exe on PATH. The workflow" +
+            " stops at Start when neither is there.")]
+        public string FfmpegPath
+        {
+            get
+            {
+                return _ffmpegPath;
+            }
+            set
+            {
+                _ffmpegPath = value;
+            }
+        }
+    
+        public System.IObservable<VideoEncoder> Generate()
+        {
+            return System.Reactive.Linq.Observable.Defer(() => System.Reactive.Linq.Observable.Return(new VideoEncoder(this)));
+        }
+    
+        public System.IObservable<VideoEncoder> Generate<TSource>(System.IObservable<TSource> source)
+        {
+            return System.Reactive.Linq.Observable.Select(source, _ => new VideoEncoder(this));
+        }
+    
+        protected virtual bool PrintMembers(System.Text.StringBuilder stringBuilder)
+        {
+            stringBuilder.Append("Codec = " + _codec + ", ");
+            stringBuilder.Append("FfmpegPath = " + _ffmpegPath);
+            return true;
+        }
+    
+        public override string ToString()
+        {
+            System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+            stringBuilder.Append(GetType().Name);
+            stringBuilder.Append(" { ");
+            if (PrintMembers(stringBuilder))
+            {
+                stringBuilder.Append(" ");
+            }
+            stringBuilder.Append("}");
+            return stringBuilder.ToString();
+        }
+    }
+
+
+    /// <summary>
     /// What is plugged into one line of the board. Nothing compares it with a workflow at Start; a
     ///dome's reward and Zapit lines are read from it. part and note are for people.
     /// </summary>
@@ -2568,6 +2689,25 @@ namespace UclOpenCoenBehaviourBox
             stringBuilder.Append("}");
             return stringBuilder.ToString();
         }
+    }
+
+
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Bonsai.Sgen", "0.7.2.0 (Newtonsoft.Json v13.0.0.0, YamlDotNet v16.0.0.0)")]
+    [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+    public enum VideoEncoderCodec
+    {
+    
+        [System.Runtime.Serialization.EnumMemberAttribute(Value="libx264")]
+        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="libx264")]
+        Libx264 = 0,
+    
+        [System.Runtime.Serialization.EnumMemberAttribute(Value="h264_nvenc")]
+        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="h264_nvenc")]
+        H264Nvenc = 1,
+    
+        [System.Runtime.Serialization.EnumMemberAttribute(Value="h264_qsv")]
+        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="h264_qsv")]
+        H264Qsv = 2,
     }
 
 
@@ -2920,6 +3060,11 @@ namespace UclOpenCoenBehaviourBox
             return Process<UclOpenCoenBehaviourBoxTaskParameters>(source);
         }
 
+        public System.IObservable<string> Process(System.IObservable<VideoEncoder> source)
+        {
+            return Process<VideoEncoder>(source);
+        }
+
         public System.IObservable<string> Process(System.IObservable<WiredLine> source)
         {
             return Process<WiredLine>(source);
@@ -2964,6 +3109,7 @@ namespace UclOpenCoenBehaviourBox
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<SpinnakerCamera>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskLogic>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskParameters>))]
+    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<VideoEncoder>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<WiredLine>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<DO2>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<DO3>))]
@@ -3203,6 +3349,11 @@ namespace UclOpenCoenBehaviourBox
             return Process<UclOpenCoenBehaviourBoxTaskParameters>(source);
         }
 
+        public System.IObservable<string> Process(System.IObservable<VideoEncoder> source)
+        {
+            return Process<VideoEncoder>(source);
+        }
+
         public System.IObservable<string> Process(System.IObservable<WiredLine> source)
         {
             return Process<WiredLine>(source);
@@ -3247,6 +3398,7 @@ namespace UclOpenCoenBehaviourBox
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<SpinnakerCamera>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskLogic>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskParameters>))]
+    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<VideoEncoder>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<WiredLine>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<DO2>))]
     [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<DO3>))]

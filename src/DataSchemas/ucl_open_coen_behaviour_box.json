@@ -120,6 +120,19 @@
           "description": "Triggered Spinnaker cameras by name, such as box (Camera-Box), whose frame rate is the board's trigger0_frequency.",
           "title": "Camera",
           "type": "object"
+        },
+        "videoEncoder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VideoEncoder"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "How the cameras' video is encoded; left out: libx264 and the ffmpeg.exe on PATH.",
+          "title": "VideoEncoder"
         }
       },
       "required": [
@@ -826,6 +839,33 @@
     "UclOpenCoenBehaviourBoxTaskParameters": {
       "properties": {},
       "title": "UclOpenCoenBehaviourBoxTaskParameters",
+      "type": "object"
+    },
+    "VideoEncoder": {
+      "description": "How this machine encodes its cameras' video: OpenRigs.Video's FfmpegVideoWriter (OpenRigs.Logging's LogVideoFfmpeg)\nreads it at Start. The encoder is the machine's, so it is one setting for every camera.",
+      "properties": {
+        "codec": {
+          "default": "libx264",
+          "description": "The FFmpeg H.264 encoder: h264_nvenc on an NVIDIA GPU, h264_qsv on Intel Quick Sync, libx264 (software, the default) on any machine with the cores for it.",
+          "enum": [
+            "libx264",
+            "h264_nvenc",
+            "h264_qsv"
+          ],
+          "title": "Codec",
+          "type": "string"
+        },
+        "ffmpegPath": {
+          "default": null,
+          "description": "The full path of ffmpeg.exe. Left out: the first ffmpeg.exe on PATH. The workflow stops at Start when neither is there.",
+          "title": "FfmpegPath",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "title": "VideoEncoder",
       "type": "object"
     },
     "WiredLine": {
