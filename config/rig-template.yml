@@ -8,8 +8,8 @@
 # is missing. The frame rate is behaviorBoard.main.cameraTriggerController.trigger0Frequency;
 # camera.overhead.triggerFrequency and trigger1Frequency are not used by this rig. usbSerial is the
 # board's USB serial, as the rig's hardware scan lists it for portName: the workflow stops at
-# Start if the board on portName has another. rigId is the rig's code (B1 GEEK-BBOX1, D1 and D2
-# the green domes, O1 and O2 the blue opto rigs, A1 PINK-ACUTE), the end of every session ID.
+# Start if the board on portName has another. rigId is the rig's code (S1 and S2 the behaviour
+# boxes, G1 and G2 the green domes, B1 and B2 the blue opto rigs, A1 the arena), the end of every session ID.
 behaviorBoard:
   main:
     cameraTriggerController:
