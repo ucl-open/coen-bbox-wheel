@@ -2306,13 +2306,13 @@ namespace UclOpenCoenBehaviourBox
     public partial class VideoEncoder
     {
     
-        private VideoEncoderCodec _codec;
+        private string _codec;
     
         private string _ffmpegPath;
     
         public VideoEncoder()
         {
-            _codec = VideoEncoderCodec.Libx264;
+            _codec = "libx264";
         }
     
         protected VideoEncoder(VideoEncoder other)
@@ -2328,7 +2328,7 @@ namespace UclOpenCoenBehaviourBox
         [YamlDotNet.Serialization.YamlMemberAttribute(Alias="codec")]
         [System.ComponentModel.DescriptionAttribute("The FFmpeg H.264 encoder: h264_nvenc on an NVIDIA GPU, h264_qsv on Intel Quick Sy" +
             "nc, libx264 (software, the default) on any machine with the cores for it.")]
-        public VideoEncoderCodec Codec
+        public string Codec
         {
             get
             {
@@ -2689,25 +2689,6 @@ namespace UclOpenCoenBehaviourBox
             stringBuilder.Append("}");
             return stringBuilder.ToString();
         }
-    }
-
-
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Bonsai.Sgen", "0.7.2.0 (Newtonsoft.Json v13.0.0.0, YamlDotNet v16.0.0.0)")]
-    [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-    public enum VideoEncoderCodec
-    {
-    
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="libx264")]
-        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="libx264")]
-        Libx264 = 0,
-    
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="h264_nvenc")]
-        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="h264_nvenc")]
-        H264Nvenc = 1,
-    
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="h264_qsv")]
-        [YamlDotNet.Serialization.YamlMemberAttribute(Alias="h264_qsv")]
-        H264Qsv = 2,
     }
 
 
