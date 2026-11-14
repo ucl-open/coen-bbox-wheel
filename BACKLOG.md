@@ -1,5 +1,9 @@
 # Backlog
 
+## Open
+
+- **Camera CSV still says `Seconds`** (14 Nov 2026). Since Logging coen-lab.7 every lab log's Harp time column is `harpTime` (lib-open-rigs `specs/logging.md` section 4), and the dome tasks' camera CSVs (LogVideo) say `harpTime,ChunkData.FrameID,ChunkData.Timestamp`. This workflow builds its own camera row (`src/main.bonsai`, `Item1.Item1 as Seconds, ... Timestamp, FrameID, ExposureTime`) and writes it with Bonsai's `io:CsvWriter`, so the package bump left it on `Seconds`. Smallest fix: rename the field to `harpTime` in that expression, the node's description and README; or move to the lab `CsvWriter`, which also aligns names with the domes. Left for later (Pip).
+
 ## Audit 2 Nov 2026 (rig.yml-driven Harp identity, dump and register map): not changed
 
 Fixed in the same round: OpenRigs.HarpDevices 0.1.0-local.2 and OpenRigs.Manifest 0.1.0-local.9 (lib-open-rigs's BACKLOG); the README named the dump's file `BehaviorBoard-Main_<address>_<DateTime>.bin`, where the session has it in `BehaviorBoard-Main_<DateTime>.bin`; the Clock group's description still said Logging asks for the dump after BoardClockSet; `check-workflow.ps1` overwrote every node's rig.yml root before building, so main.bonsai's four hand-typed copies (RigConfig, RecordHarpDevices, ExperimentManifest's ConfigFiles, LiveView) could disagree unseen, and now checks they agree first.
