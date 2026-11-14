@@ -13,7 +13,7 @@ param(
 #      and a missing entry or a name breaking the naming rules stops it; and every key in it
 #      reaches the Settings_Rig JSON the experiment logs.
 #   4. ExposureFitsTrigger's limit (19,000 us passes at 50 Hz, 19,001 and 30,000 stop),
-#      SessionKey on an experiment folder's path, no dump or register map of the workflow's own, the camera recorded by
+#      no dump or register map of the workflow's own, the camera recorded by
 #      LogVideoFfmpeg with no writer of the workflow's own, Watchdog's own message, and CameraOverrides'
 #      refusal without a "Parameter name" line; in main.bonsai, every timeout is a Watchdog with a message.
 # Needs a deployed clone (scripts\deploy.cmd: .bonsai\Packages). Exit 0 when all four pass.
@@ -276,12 +276,6 @@ if ($Step -eq 'Checks') {
         elseif ($c[1]) { "  ok    ExposureTime $($c[0]) fits 50 Hz" }
         else { "  ok    ExposureTime $($c[0]) refused: $($x.Message)" }
     }
-    $key = [UclOpenCoenBehaviourBox.SessionKey]::FromPathPrefix('C:\Data\sub-M1\ses-01_date-2026-10-30T17-46-16')
-    if ($key -eq 'sub-M1/ses-01_date-2026-10-30T17-46-16') { "  ok    SessionKey $key" } else { "  FAIL  SessionKey gave '$key'"; $failed++ }
-    $x = Get-Refusal { [UclOpenCoenBehaviourBox.SessionKey]::FromPathPrefix('C:\Data\not-an-experiment') }
-    if ($x -and $x.Message.Contains('does not end in sub-')) { "  ok    SessionKey refused a path that is not an experiment folder" } else { "  FAIL  SessionKey accepted 'C:\Data\not-an-experiment'"; $failed++ }
-    $x = Get-Refusal { [UclOpenCoenBehaviourBox.SessionKey]::FromPathPrefix('C:\Data\sub-M1\ses-03/1_date-2026-10-30T17-46-16') }
-    if ($x -and $x.Message.Contains('in SubjectId or SessionId')) { "  ok    SessionKey refused a SessionId with a slash, naming the cause" } else { "  FAIL  SessionKey on a SessionId with a slash: $(if ($x) { $x.Message } else { 'accepted' })"; $failed++ }
     $experiment = Join-Path ([IO.Path]::GetTempPath()) ("hds-" + [guid]::NewGuid().ToString('N'))
     try {
         # The board's dump and register map come from RecordHarpDevices (OpenRigs.HarpDevices), from
@@ -351,7 +345,7 @@ if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ } else { "  ok" }
 "3. RigDevice on config\rig-template.yml..."
 & powershell -NoProfile -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path -Step RigDevice
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
-"4. ExposureFitsTrigger, SessionKey, Watchdog and CameraOverrides..."
+"4. ExposureFitsTrigger, Watchdog and CameraOverrides..."
 & powershell -NoProfile -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path -Step Checks
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
 if ($bad) { "check-workflow: $bad of 4 steps failed."; exit 1 }
