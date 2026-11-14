@@ -8,8 +8,6 @@
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
                  xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
-                 xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
-                 xmlns:ffm="clr-namespace:Bonsai.FFmpeg;assembly=Bonsai.FFmpeg"
                  xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
                  xmlns:orc="clr-namespace:OpenRigs.Core;assembly=OpenRigs.Core"
                  xmlns:orv="clr-namespace:OpenRigs.Video;assembly=OpenRigs.Video"
@@ -346,7 +344,7 @@
                   </Expression>
                   <Expression xsi:type="GroupWorkflow">
                     <Name>Clock</Name>
-                    <Description>Sets the board's clock to the PC's UTC time (SynchronizeTimestamp, whole seconds) as soon as the board sends its first message, and publishes BoardClockSet once a TimestampSeconds message from the board (its once-a-second heartbeat, or the write's reply) carries a time within 2 s of the PC's UTC time (BoardClockAgrees). Until then each heartbeat that disagrees sends the write again. BoardClockSet does not rely on catching the write's reply: Bonsai subscribes a workflow's branches one after another while the board is already talking, and the branch waiting for the reply could subscribe after it had come (2 Nov 2026: about 1 start in 4 stopped on this Watchdog that way). Without the clock the board counts from power-on, and Harp timestamps, the CSV Seconds column and every file name follow that count (1904-01-04T17-00-00 and so on). The board's own open-time register dump comes before this write and is not logged; Logging waits for BoardClockSet before it logs the board; the dump it keeps is asked for by Logging &gt; RecordHarpDevices, 0.5 s after PathPrefix names the experiment folder, after Go. If the board's clock does not agree 10 s after Start, Watchdog stops the workflow with a message saying so, rather than record a whole experiment with no board files; triggers start 5 s after Start, so the experiment folder then holds a few seconds of video and CSV and no board files. (4 s stopped every run: Watchdog's time counts from the workflow's subscription, before the config and camera are up.)</Description>
+                    <Description>Sets the board's clock to the PC's UTC time (SynchronizeTimestamp, whole seconds) as soon as the board sends its first message, and publishes BoardClockSet once a TimestampSeconds message from the board (its once-a-second heartbeat, or the write's reply) carries a time within 2 s of the PC's UTC time (BoardClockAgrees). Until then each heartbeat that disagrees sends the write again. BoardClockSet does not rely on catching the write's reply: Bonsai subscribes a workflow's branches one after another while the board is already talking, and the branch waiting for the reply could subscribe after it had come (2 Nov 2026: about 1 start in 4 stopped on this Watchdog that way). Without the clock the board counts from power-on, and Harp timestamps, the camera CSV's harpTime column and every file name follow that count (1904-01-04T17-00-00 and so on). The board's own open-time register dump comes before this write and is not logged; Logging waits for BoardClockSet before it logs the board; the dump it keeps is asked for by Logging &gt; RecordHarpDevices, 0.5 s after PathPrefix names the experiment folder, after Go. If the board's clock does not agree 10 s after Start, Watchdog stops the workflow with a message saying so, rather than record a whole experiment with no board files; triggers start 5 s after Start, so the experiment folder then holds a few seconds of video and CSV and no board files. (4 s stopped every run: Watchdog's time counts from the workflow's subscription, before the config and camera are up.)</Description>
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="SubscribeSubject">
@@ -724,7 +722,7 @@
             </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>RecordVideo</Name>
-              <Description>Subscribed only once PathPrefix exists: Take reads its Count, and the writers may read FileName, at subscription. Records the run length's worth of frames (RunLengthToFrames), split into one-hour chunks on the frames' Harp time (GroupByTime, as the board's log is), each chunk to &lt;Name&gt;\&lt;Name&gt;_&lt;DateTime&gt;.avi and .csv, Name being the camera's from its subject (Camera-Overhead), named by OpenRigs.Logging's FormatFileName after the chunk's start as the board's files are. CSV columns, as av-dome writes for its cameras: Seconds (Harp time of the frame's trigger), Timestamp and FrameID (camera), ExposureTime. A run crossing the hour gives two pairs; one ffmpeg closes and the next opens there. The video is H.264 through FFmpeg on Intel Quick Sync (Bonsai.Vision's VideoWriter, which av-dome and LogVideo use, fell behind on the N150 and crashed long experiments). ExposureTime is the CameraExposureUs parameter at Go (rig.yml's unless the controller changed it while ready; fixed from Go), because OpenRigs.Video's frame does not carry the camera's. Wait for ffmpeg.exe to exit before closing Bonsai. SampleInterval here samples the recorded frames, 5 a second; the editor's preview window (config\main.layout) is on Hardware &gt; Camera's last node instead, which takes every camera frame from Start, so it shows the camera in ready mode.</Description>
+              <Description>Subscribed only once PathPrefix exists: Take reads its Count at subscription. Records the run length's worth of frames (RunLengthToFrames) with OpenRigs.Logging's LogVideoFfmpeg: one-hour chunks on the frames' Harp time, as the board's log is, each to &lt;Name&gt;\&lt;Name&gt;_&lt;DateTime&gt;.mkv and .csv, Name being the camera's from its subject (Camera-Overhead). The CSV has one row per video frame: harpTime (the Harp time of the frame's trigger), frameId, cameraClockNs, and exposureUs and gainDb as the camera reports them for that frame. The codec and ffmpeg.exe are rig.yml's videoEncoder (h264_qsv on the boxes; without it libx264, in software), read under ConfigRoot as each file opens (through StringProperty, so the Logging mapping it shares with RecordHarpDevices sees a string, not the unloaded include's untyped property); a missing ffmpeg.exe or unknown codec stops the workflow then. The writer keeps Bonsai open until each file is closed. SampleInterval here samples the recorded frames, 5 a second; the editor's preview window (config\main.layout) is on Hardware &gt; Camera's last node instead, which takes every camera frame from Start, so it shows the camera in ready mode.</Description>
               <Workflow>
                 <Nodes>
                   <Expression xsi:type="WorkflowInput">
@@ -768,170 +766,17 @@
                     <rx:Count>3000</rx:Count>
                   </Combinator>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="orc:GroupByTime">
-                      <orc:ChunkSize>1</orc:ChunkSize>
-                    </Combinator>
+                  <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:LogVideoFfmpeg.bonsai">
+                    <LogName>UNMAPPED</LogName>
+                    <FrameRate>50</FrameRate>
                   </Expression>
-                  <Expression xsi:type="rx:CreateObservable">
-                    <Name>CameraChunk</Name>
-                    <Description>One chunk's frames: the video and its CSV, each named after the chunk's start (the group's Key), as OpenRigs.Logging's LogVideo does.</Description>
-                    <Workflow>
-                      <Nodes>
-                        <Expression xsi:type="WorkflowInput">
-                          <Name>Source1</Name>
-                        </Expression>
-                        <Expression xsi:type="rx:AsyncSubject">
-                          <Name>Chunk</Name>
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>Chunk</Name>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Merge" />
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>Chunk</Name>
-                        </Expression>
-                        <Expression xsi:type="MemberSelector">
-                          <Selector>Key</Selector>
-                        </Expression>
-                        <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:FormatFileName.bonsai">
-                          <Name>UNMAPPED</Name>
-                          <Extension>avi</Extension>
-                        </Expression>
-                        <Expression xsi:type="PropertyMapping">
-                          <PropertyMappings>
-                            <Property Name="FileName" />
-                          </PropertyMappings>
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>BehaviorBoard-Main</Name>
-                        </Expression>
-                        <Expression xsi:type="PropertyMapping">
-                          <PropertyMappings>
-                            <Property Name="FrameRate" Selector="Settings.CameraTriggerController.Trigger0Frequency" />
-                          </PropertyMappings>
-                        </Expression>
-                        <Expression xsi:type="MemberSelector">
-                          <Selector>Value.Image</Selector>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="ffm:VideoWriter">
-                            <ffm:FileName />
-                            <ffm:Suffix>None</ffm:Suffix>
-                            <ffm:Overwrite>false</ffm:Overwrite>
-                            <ffm:FrameRate>50</ffm:FrameRate>
-                            <ffm:OutputArguments>-loglevel error -nostats -c:v h264_qsv -preset veryfast -global_quality 20 -bf 0 -pix_fmt nv12</ffm:OutputArguments>
-                          </Combinator>
-                        </Expression>
-                        <Expression xsi:type="WorkflowOutput" />
-                        <Expression xsi:type="MemberSelector">
-                          <Selector>Seconds</Selector>
-                        </Expression>
-                        <Expression xsi:type="MemberSelector">
-                          <Selector>Value.ChunkData.Timestamp</Selector>
-                        </Expression>
-                        <Expression xsi:type="MemberSelector">
-                          <Selector>Value.ChunkData.FrameID</Selector>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Zip" />
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>ExperimentGo</Name>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="orcl:ParameterValue">
-                            <orcl:Name>CameraExposureUs</orcl:Name>
-                          </Combinator>
-                        </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:WithLatestFrom" />
-                        </Expression>
-                        <Expression xsi:type="scr:ExpressionTransform">
-                          <scr:Expression>new(
-                  Item1.Item1 as Seconds,
-                  Item1.Item2 as Timestamp,
-                  Item1.Item3 as FrameID,
-                  Item2 as ExposureTime)</scr:Expression>
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>Chunk</Name>
-                        </Expression>
-                        <Expression xsi:type="MemberSelector">
-                          <Selector>Key</Selector>
-                        </Expression>
-                        <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:FormatFileName.bonsai">
-                          <Name>UNMAPPED</Name>
-                          <Extension>csv</Extension>
-                        </Expression>
-                        <Expression xsi:type="PropertyMapping">
-                          <PropertyMappings>
-                            <Property Name="FileName" />
-                          </PropertyMappings>
-                        </Expression>
-                        <Expression xsi:type="io:CsvWriter">
-                          <io:FileName />
-                          <io:Append>false</io:Append>
-                          <io:Overwrite>false</io:Overwrite>
-                          <io:Suffix>None</io:Suffix>
-                          <io:IncludeHeader>true</io:IncludeHeader>
-                          <io:Selector />
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>Camera-Overhead</Name>
-                        </Expression>
-                        <Expression xsi:type="PropertyMapping">
-                          <PropertyMappings>
-                            <Property Name="Name" Selector="Name" />
-                          </PropertyMappings>
-                        </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>Camera-Overhead</Name>
-                        </Expression>
-                        <Expression xsi:type="PropertyMapping">
-                          <PropertyMappings>
-                            <Property Name="Name" Selector="Name" />
-                          </PropertyMappings>
-                        </Expression>
-                      </Nodes>
-                      <Edges>
-                        <Edge From="0" To="1" Label="Source1" />
-                        <Edge From="2" To="3" Label="Source1" />
-                        <Edge From="3" To="10" Label="Source1" />
-                        <Edge From="10" To="11" Label="Source1" />
-                        <Edge From="4" To="5" Label="Source1" />
-                        <Edge From="5" To="6" Label="Source1" />
-                        <Edge From="6" To="7" Label="Source1" />
-                        <Edge From="7" To="11" Label="Source2" />
-                        <Edge From="8" To="9" Label="Source1" />
-                        <Edge From="9" To="11" Label="Source3" />
-                        <Edge From="11" To="12" Label="Source1" />
-                        <Edge From="3" To="13" Label="Source1" />
-                        <Edge From="3" To="14" Label="Source1" />
-                        <Edge From="3" To="15" Label="Source1" />
-                        <Edge From="13" To="16" Label="Source1" />
-                        <Edge From="14" To="16" Label="Source2" />
-                        <Edge From="15" To="16" Label="Source3" />
-                        <Edge From="17" To="18" Label="Source1" />
-                        <Edge From="16" To="19" Label="Source1" />
-                        <Edge From="18" To="19" Label="Source2" />
-                        <Edge From="19" To="20" Label="Source1" />
-                        <Edge From="21" To="22" Label="Source1" />
-                        <Edge From="22" To="23" Label="Source1" />
-                        <Edge From="23" To="24" Label="Source1" />
-                        <Edge From="20" To="25" Label="Source1" />
-                        <Edge From="24" To="25" Label="Source2" />
-                        <Edge From="26" To="27" Label="Source1" />
-                        <Edge From="27" To="6" Label="Source2" />
-                        <Edge From="28" To="29" Label="Source1" />
-                        <Edge From="29" To="23" Label="Source2" />
-                      </Edges>
-                    </Workflow>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Camera-Overhead</Name>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Switch" />
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="LogName" Selector="Name" />
+                    </PropertyMappings>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
                   <Expression xsi:type="MemberSelector">
@@ -942,15 +787,41 @@
                     <rx:Interval>PT0.2S</rx:Interval>
                   </Combinator>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>BehaviorBoard-Main</Name>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="FrameRate" Selector="Settings.CameraTriggerController.Trigger0Frequency" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="ExternalizedMapping">
+                    <Property Name="Value" DisplayName="ConfigRoot" />
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="StringProperty">
+                      <Value>C:\Coen-Lab-Local\RigConfigs</Value>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="ConfigRoot" />
+                    </PropertyMappings>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="3" Label="Source1" />
                   <Edge From="1" To="2" Label="Source1" />
                   <Edge From="2" To="3" Label="Source2" />
                   <Edge From="3" To="4" Label="Source1" />
-                  <Edge From="4" To="5" Label="Source1" />
                   <Edge From="5" To="6" Label="Source1" />
-                  <Edge From="6" To="7" Label="Source1" />
+                  <Edge From="6" To="4" Label="Source2" />
+                  <Edge From="10" To="11" Label="Source1" />
+                  <Edge From="11" To="4" Label="Source3" />
+                  <Edge From="12" To="13" Label="Source1" />
+                  <Edge From="13" To="14" Label="Source1" />
+                  <Edge From="14" To="4" Label="Source4" />
+                  <Edge From="4" To="7" Label="Source1" />
                   <Edge From="3" To="8" Label="Source1" />
                   <Edge From="8" To="9" Label="Source1" />
                 </Edges>
@@ -1089,6 +960,7 @@
             <Edge From="28" To="29" Label="Source2" />
             <Edge From="29" To="30" Label="Source1" />
             <Edge From="32" To="16" Label="Source1" />
+            <Edge From="32" To="9" Label="Source2" />
             <Edge From="33" To="34" Label="Source1" />
             <Edge From="34" To="36" Label="Source1" />
             <Edge From="35" To="36" Label="Source2" />
@@ -1104,7 +976,7 @@
         <lv:VideoPort>5558</lv:VideoPort>
       </Expression>
       <Expression xsi:type="ExternalizedMapping">
-        <Property Name="ConfigRoot" Description="The root under which each machine has its own configuration directory, &lt;ConfigRoot&gt;\&lt;MACHINE-NAME&gt;\rig.yml, read by RigConfig, RecordHarpDevices and LiveView. ExperimentManifest's ConfigFiles names rig.yml's own path and does not follow it; the manifest notes when the two disagree." />
+        <Property Name="ConfigRoot" Description="The root under which each machine has its own configuration directory, &lt;ConfigRoot&gt;\&lt;MACHINE-NAME&gt;\rig.yml, read by RigConfig, RecordHarpDevices, Logging &gt; RecordVideo's video writer and LiveView. ExperimentManifest's ConfigFiles names rig.yml's own path and does not follow it; the manifest notes when the two disagree." />
       </Expression>
     </Nodes>
     <Edges>

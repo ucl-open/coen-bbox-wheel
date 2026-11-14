@@ -99,8 +99,9 @@ if ((Test-Path -Path $layout) -and ((Get-FileHash $layout).Hash -ne (Get-FileHas
 Copy-Item ".\config\main.layout" $layout -Force
 Write-Output "$layout is config\main.layout (camera preview and exposure and gain open at Start)."
 
-# The video is encoded by ffmpeg.exe, which Bonsai.FFmpeg starts from PATH, on Intel Quick Sync
-# (h264_qsv). Without it, recording stops as soon as the first video file opens.
+# The video is encoded by ffmpeg.exe, which LogVideoFfmpeg starts from PATH (or rig.yml's
+# videoEncoder.ffmpegPath), with rig.yml's videoEncoder.codec: libx264 until the workflow can read
+# h264_qsv, Intel Quick Sync (BACKLOG). Without ffmpeg.exe the workflow stops at Go.
 $ffmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
 if (-not $ffmpeg) {
     Write-Warning "FFmpeg was not found on PATH. Install it with: winget install --id Gyan.FFmpeg -e, then open a new window."

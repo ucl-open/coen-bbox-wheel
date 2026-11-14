@@ -2,6 +2,7 @@ from pathlib import Path
 
 from open_rigs.core import yaml
 from open_rigs.devices.behavior_board import CameraTriggerController, RunningWheel
+from open_rigs.rigs.behaviour_box import VideoEncoder
 
 from ucl_open_coen_behaviour_box.rig import (
     BehaviorBoard,
@@ -44,6 +45,8 @@ rig = BehaviourBoxRig(
     camera={
         "overhead": SpinnakerCamera(serial_number="CHANGE-ME", exposure_time=10000, gain=5, binning=1, trigger_frequency=50)
     },
+    # Every box is an Intel N150 or N100, whose Quick Sync the setup tool checks.
+    video_encoder=VideoEncoder(codec="h264_qsv"),
 )
 
 

@@ -13,7 +13,8 @@ param(
 #      and a missing entry or a name breaking the naming rules stops it; and every key in it
 #      reaches the Settings_Rig JSON the experiment logs.
 #   4. ExposureFitsTrigger's limit (19,000 us passes at 50 Hz, 19,001 and 30,000 stop),
-#      SessionKey on an experiment folder's path, no dump or register map of the workflow's own, Watchdog's own message, and CameraOverrides'
+#      SessionKey on an experiment folder's path, no dump or register map of the workflow's own, the camera recorded by
+#      LogVideoFfmpeg with no writer of the workflow's own, Watchdog's own message, and CameraOverrides'
 #      refusal without a "Parameter name" line; in main.bonsai, every timeout is a Watchdog with a message.
 # Needs a deployed clone (scripts\deploy.cmd: .bonsai\Packages). Exit 0 when all four pass.
 $ErrorActionPreference = 'Stop'
@@ -69,7 +70,8 @@ if ($Step -eq 'Build') {
     if (-not $template.Contains("rootPath: $bin")) { throw "check-workflow: config\rig-template.yml's rootPath is not C:\Coen-Lab-Local\Acquired-Data; update the Replace above." }
     [IO.File]::WriteAllText($rigYml, $template)
     # Before they are overwritten below: every node's own copy of where rig.yml is (RigConfig's
-    # ResolveRigConfigDirectory, RecordHarpDevices, ExperimentManifest's ConfigFiles, LiveView) is
+    # ResolveRigConfigDirectory, RecordHarpDevices, ExperimentManifest's ConfigFiles, LiveView,
+    # RecordVideo's StringProperty for LogVideoFfmpeg) is
     # typed by hand into main.bonsai, and they must all be the same root.
     function Get-ConfigRoots($graph) {
         foreach ($n in $graph) {
@@ -79,16 +81,20 @@ if ($Step -eq 'Build') {
             if ($b.GetType().Name -eq 'ExperimentManifest') {
                 foreach ($file in $b.ConfigFiles -split ';') { if ($file -match '^(.*)\\%COMPUTERNAME%\\rig\.yml$') { "ExperimentManifest.ConfigFiles=$($Matches[1])" } }
             }
+            # RecordVideo's ConfigRoot: a StringProperty, which LogVideoFfmpeg's writer takes by PropertyMapping.
+            if ($b -is [Bonsai.Expressions.ExternalizedMappingBuilder] -and @($b.ExternalizedProperties | Where-Object { $_.Name -eq 'Value' -and $_.DisplayName -eq 'ConfigRoot' }).Count) {
+                foreach ($s in $n.Successors) { $t = [Bonsai.Expressions.ExpressionBuilder]::GetWorkflowElement($s.Target.Value); "$($t.GetType().Name)=$($t.Value)" }
+            }
             if ($b -is [Bonsai.Expressions.IWorkflowExpressionBuilder] -and $b.Workflow) { Get-ConfigRoots $b.Workflow }
         }
     }
     $roots = @(Get-ConfigRoots $wb.Workflow)
     $distinct = @($roots | ForEach-Object { ($_ -split '=', 2)[1].TrimEnd('\') } | Sort-Object -Unique)
-    $rootsOk = $roots.Count -ge 4 -and $distinct.Count -eq 1
+    $rootsOk = $roots.Count -ge 5 -and $distinct.Count -eq 1 -and @($roots | Where-Object { $_ -like 'StringProperty=*' }).Count -eq 1
     if ($rootsOk) { "  ok    every node reads rig.yml under the same root, $($distinct[0]) ($($roots.Count) nodes)" }
-    else { "  FAIL  the nodes' rig.yml roots differ, or fewer than 4 were found: $($roots -join '; ')" }
+    else { "  FAIL  the nodes' rig.yml roots differ, fewer than 5 were found, or not RecordVideo's StringProperty: $($roots -join '; ')" }
     # ConfigRoot set as Bonsai's launcher sets --property:ConfigRoot: one workflow property, mapped
-    # to every node that reads rig.yml by root (RigConfig, RecordHarpDevices, LiveView; HarpDevices
+    # to every node that reads rig.yml by root (RigConfig, RecordHarpDevices, RecordVideo, LiveView; HarpDevices
     # 0.1.0-local.5 and LiveView local.8 let it, 3 Nov 2026), so a node it misses reads the
     # machine's own rig.yml and fails here. ExperimentManifest's ConfigFiles names rig.yml's own path
     # and is set by hand.
@@ -291,6 +297,9 @@ if ($Step -eq 'Checks') {
         # LogDataSchema in OpenRigs.Logging 0.1.0-bbox.1 reads its file name before the experiment folder exists.
         if ((Get-Content (Join-Path $repo 'src\main.bonsai') -Raw) -match 'LogDataSchema\.bonsai') { "  FAIL  main.bonsai uses LogDataSchema, which writes to the include's saved path in this build"; $failed++ }
         else { "  ok    main.bonsai does not use LogDataSchema" }
+        # The camera's .mkv and CSV (harpTime, frameId, cameraClockNs, exposureUs, gainDb) are LogVideoFfmpeg's, as the domes'.
+        if ($wf -match 'OpenRigs\.Logging:LogVideoFfmpeg\.bonsai' -and $wf -notmatch 'xsi:type="(ffm:VideoWriter|io:CsvWriter|cv:VideoWriter)"') { "  ok    main.bonsai records the camera with LogVideoFfmpeg and writes no video or CSV of its own" }
+        else { "  FAIL  main.bonsai does not record the camera with LogVideoFfmpeg, or writes a video or CSV of its own"; $failed++ }
     } finally { Remove-Item $experiment -Recurse -Force -ErrorAction SilentlyContinue }
 
     # The Rx operators below run on worker threads: load everything now and drop the resolver,
