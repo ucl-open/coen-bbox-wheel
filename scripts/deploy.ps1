@@ -100,8 +100,8 @@ Copy-Item ".\config\main.layout" $layout -Force
 Write-Output "$layout is config\main.layout (camera preview and exposure and gain open at Start)."
 
 # The video is encoded by ffmpeg.exe, which LogVideoFfmpeg starts from PATH (or rig.yml's
-# videoEncoder.ffmpegPath), with rig.yml's videoEncoder.codec: libx264 until the workflow can read
-# h264_qsv, Intel Quick Sync (BACKLOG). Without ffmpeg.exe the workflow stops at Go.
+# videoEncoder.ffmpegPath), with rig.yml's videoEncoder.codec (h264_qsv, Intel Quick Sync, on the
+# boxes; libx264 when left out). Without ffmpeg.exe the workflow stops at Go.
 $ffmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
 if (-not $ffmpeg) {
     Write-Warning "FFmpeg was not found on PATH. Install it with: winget install --id Gyan.FFmpeg -e, then open a new window."
