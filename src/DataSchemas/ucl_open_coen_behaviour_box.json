@@ -78,7 +78,7 @@
             }
           ],
           "default": null,
-          "description": "What is plugged into each line (Pip, 7 Nov 2026). Not checked at Start against the workflow.",
+          "description": "What is plugged into each line. Reward valves and the Zapit trigger are read from here; nothing else is checked at Start against the workflow.",
           "title": "Wiring"
         }
       },
@@ -90,6 +90,7 @@
       "type": "object"
     },
     "BehaviourBoxRig": {
+      "description": "A behaviour box's choice of LabRig's parts: Behavior boards, cameras and the video encoder. A box's\nworkflow takes this, not LabRig, because the generated C# of the other parts needs packages a box's\nBonsai environment lacks (Harp.TimestampGeneratorGen3 0.1.1's TimerRate).",
       "properties": {
         "rootPath": {
           "description": "The root path on which to log all data.",
@@ -109,7 +110,7 @@
           "additionalProperties": {
             "$ref": "#/$defs/BehaviorBoard"
           },
-          "description": "Harp Behavior boards by name, such as main (BehaviorBoard-Main): serial port, camera trigger on Trigger0 and running wheel on encoder port 2.",
+          "description": "Harp Behavior boards by name, such as main (BehaviorBoard-Main): valves, camera trigger, Zapit trigger and running wheel.",
           "title": "BehaviorBoard",
           "type": "object"
         },
@@ -117,7 +118,7 @@
           "additionalProperties": {
             "$ref": "#/$defs/SpinnakerCamera"
           },
-          "description": "Triggered Spinnaker cameras by name, such as box (Camera-Box), whose frame rate is the board's trigger0_frequency.",
+          "description": "Triggered Spinnaker cameras by name, such as face (Camera-Face), whose frame rate is the board's trigger0_frequency.",
           "title": "Camera",
           "type": "object"
         },
@@ -136,9 +137,7 @@
         }
       },
       "required": [
-        "rootPath",
-        "behaviorBoard",
-        "camera"
+        "rootPath"
       ],
       "title": "BehaviourBoxRig",
       "type": "object"
@@ -801,7 +800,7 @@
         "pixelFormat": {
           "const": "Mono8",
           "default": "Mono8",
-          "description": "The pixel format the camera sends, a Spinnaker PixelFormat name LogVideo can write: Mono8 (Pip, 11 Nov 2026). Set each time the camera opens, so a format stored on the camera is never used. Mono8 when not set.",
+          "description": "The pixel format the camera sends, a Spinnaker PixelFormat name LogVideo can write: Mono8. Set each time the camera opens, so a format stored on the camera is never used. Mono8 when not set.",
           "title": "PixelFormat",
           "type": "string"
         }
@@ -865,10 +864,10 @@
       "type": "object"
     },
     "WiredLine": {
-      "description": "What is plugged into one line of the board. Nothing compares it with a workflow at Start; a\ndome's reward and Zapit lines are read from it. part and note are for people.",
+      "description": "What is plugged into one line of the board. Nothing compares it with a workflow at Start; a\nrig's reward and Zapit lines are read from it. part and note are for people.",
       "properties": {
         "device": {
-          "description": "What is on the line: one of the lab's wiredDevices in K:\\config\\device-dictionary.json. Nothing checks it against that list.",
+          "description": "What is on the line: one of the wiredDevices in the lab's device dictionary (config\\device-dictionary.json on its share). Nothing checks it against that list.",
           "examples": [
             "RewardValve",
             "CameraTrigger",

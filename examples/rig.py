@@ -2,13 +2,7 @@ from pathlib import Path
 
 from open_rigs.core import yaml
 from open_rigs.devices.behavior_board import CameraTriggerController, RunningWheel
-from open_rigs.rigs.behaviour_box import VideoEncoder
-
-from ucl_open_coen_behaviour_box.rig import (
-    BehaviorBoard,
-    SpinnakerCamera,
-    BehaviourBoxRig
-)
+from ucl_open_coen_behaviour_box.rig import BehaviorBoard, BehaviourBoxRig, SpinnakerCamera, VideoEncoder
 
 TEMPLATE_PATH = Path("config/rig-template.yml")
 SCHEMA_PATH = "../src/DataSchemas/ucl_open_coen_behaviour_box.json#/$defs/BehaviourBoxRig"

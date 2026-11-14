@@ -163,13 +163,13 @@ namespace UclOpenCoenBehaviourBox
         }
     
         /// <summary>
-        /// What is plugged into each line (Pip, 7 Nov 2026). Not checked at Start against the workflow.
+        /// What is plugged into each line. Reward valves and the Zapit trigger are read from here; nothing else is checked at Start against the workflow.
         /// </summary>
         [System.Xml.Serialization.XmlIgnoreAttribute()]
         [Newtonsoft.Json.JsonPropertyAttribute("wiring")]
         [YamlDotNet.Serialization.YamlMemberAttribute(Alias="wiring")]
-        [System.ComponentModel.DescriptionAttribute("What is plugged into each line (Pip, 7 Nov 2026). Not checked at Start against th" +
-            "e workflow.")]
+        [System.ComponentModel.DescriptionAttribute("What is plugged into each line. Reward valves and the Zapit trigger are read from" +
+            " here; nothing else is checked at Start against the workflow.")]
         public BoardWiring Wiring
         {
             get
@@ -219,7 +219,15 @@ namespace UclOpenCoenBehaviourBox
     }
 
 
+    /// <summary>
+    /// A behaviour box's choice of LabRig's parts: Behavior boards, cameras and the video encoder. A box's
+    ///workflow takes this, not LabRig, because the generated C# of the other parts needs packages a box's
+    ///Bonsai environment lacks (Harp.TimestampGeneratorGen3 0.1.1's TimerRate).
+    /// </summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Bonsai.Sgen", "0.7.2.0 (Newtonsoft.Json v13.0.0.0, YamlDotNet v16.0.0.0)")]
+    [System.ComponentModel.DescriptionAttribute(@"A behaviour box's choice of LabRig's parts: Behavior boards, cameras and the video encoder. A box's
+    workflow takes this, not LabRig, because the generated C# of the other parts needs packages a box's
+    Bonsai environment lacks (Harp.TimestampGeneratorGen3 0.1.1's TimerRate).")]
     [Bonsai.WorkflowElementCategoryAttribute(Bonsai.ElementCategory.Source)]
     [Bonsai.CombinatorAttribute(MethodName="Generate")]
     public partial class BehaviourBoxRig
@@ -237,8 +245,6 @@ namespace UclOpenCoenBehaviourBox
     
         public BehaviourBoxRig()
         {
-            _behaviorBoard = new System.Collections.Generic.Dictionary<string, BehaviorBoard>();
-            _camera = new System.Collections.Generic.Dictionary<string, SpinnakerCamera>();
         }
     
         protected BehaviourBoxRig(BehaviourBoxRig other)
@@ -289,13 +295,13 @@ namespace UclOpenCoenBehaviourBox
         }
     
         /// <summary>
-        /// Harp Behavior boards by name, such as main (BehaviorBoard-Main): serial port, camera trigger on Trigger0 and running wheel on encoder port 2.
+        /// Harp Behavior boards by name, such as main (BehaviorBoard-Main): valves, camera trigger, Zapit trigger and running wheel.
         /// </summary>
         [System.Xml.Serialization.XmlIgnoreAttribute()]
-        [Newtonsoft.Json.JsonPropertyAttribute("behaviorBoard", Required=Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonPropertyAttribute("behaviorBoard")]
         [YamlDotNet.Serialization.YamlMemberAttribute(Alias="behaviorBoard")]
-        [System.ComponentModel.DescriptionAttribute("Harp Behavior boards by name, such as main (BehaviorBoard-Main): serial port, cam" +
-            "era trigger on Trigger0 and running wheel on encoder port 2.")]
+        [System.ComponentModel.DescriptionAttribute("Harp Behavior boards by name, such as main (BehaviorBoard-Main): valves, camera t" +
+            "rigger, Zapit trigger and running wheel.")]
         public System.Collections.Generic.Dictionary<string, BehaviorBoard> BehaviorBoard
         {
             get
@@ -309,13 +315,13 @@ namespace UclOpenCoenBehaviourBox
         }
     
         /// <summary>
-        /// Triggered Spinnaker cameras by name, such as box (Camera-Box), whose frame rate is the board's trigger0_frequency.
+        /// Triggered Spinnaker cameras by name, such as face (Camera-Face), whose frame rate is the board's trigger0_frequency.
         /// </summary>
         [System.Xml.Serialization.XmlIgnoreAttribute()]
-        [Newtonsoft.Json.JsonPropertyAttribute("camera", Required=Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonPropertyAttribute("camera")]
         [YamlDotNet.Serialization.YamlMemberAttribute(Alias="camera")]
-        [System.ComponentModel.DescriptionAttribute("Triggered Spinnaker cameras by name, such as box (Camera-Box), whose frame rate i" +
-            "s the board\'s trigger0_frequency.")]
+        [System.ComponentModel.DescriptionAttribute("Triggered Spinnaker cameras by name, such as face (Camera-Face), whose frame rate" +
+            " is the board\'s trigger0_frequency.")]
         public System.Collections.Generic.Dictionary<string, SpinnakerCamera> Camera
         {
             get
@@ -2082,13 +2088,13 @@ namespace UclOpenCoenBehaviourBox
         }
     
         /// <summary>
-        /// The pixel format the camera sends, a Spinnaker PixelFormat name LogVideo can write: Mono8 (Pip, 11 Nov 2026). Set each time the camera opens, so a format stored on the camera is never used. Mono8 when not set.
+        /// The pixel format the camera sends, a Spinnaker PixelFormat name LogVideo can write: Mono8. Set each time the camera opens, so a format stored on the camera is never used. Mono8 when not set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pixelFormat")]
         [YamlDotNet.Serialization.YamlMemberAttribute(Alias="pixelFormat")]
         [System.ComponentModel.DescriptionAttribute("The pixel format the camera sends, a Spinnaker PixelFormat name LogVideo can writ" +
-            "e: Mono8 (Pip, 11 Nov 2026). Set each time the camera opens, so a format stored " +
-            "on the camera is never used. Mono8 when not set.")]
+            "e: Mono8. Set each time the camera opens, so a format stored on the camera is ne" +
+            "ver used. Mono8 when not set.")]
         public string PixelFormat
         {
             get
@@ -2393,12 +2399,12 @@ namespace UclOpenCoenBehaviourBox
 
     /// <summary>
     /// What is plugged into one line of the board. Nothing compares it with a workflow at Start; a
-    ///dome's reward and Zapit lines are read from it. part and note are for people.
+    ///rig's reward and Zapit lines are read from it. part and note are for people.
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Bonsai.Sgen", "0.7.2.0 (Newtonsoft.Json v13.0.0.0, YamlDotNet v16.0.0.0)")]
     [System.ComponentModel.DescriptionAttribute("What is plugged into one line of the board. Nothing compares it with a workflow a" +
-        "t Start; a\ndome\'s reward and Zapit lines are read from it. part and note are for" +
-        " people.")]
+        "t Start; a\nrig\'s reward and Zapit lines are read from it. part and note are for " +
+        "people.")]
     [Bonsai.WorkflowElementCategoryAttribute(Bonsai.ElementCategory.Source)]
     [Bonsai.CombinatorAttribute(MethodName="Generate")]
     public partial class WiredLine
@@ -2428,12 +2434,12 @@ namespace UclOpenCoenBehaviourBox
         }
     
         /// <summary>
-        /// What is on the line: one of the lab's wiredDevices in K:\config\device-dictionary.json. Nothing checks it against that list.
+        /// What is on the line: one of the wiredDevices in the lab's device dictionary (config\device-dictionary.json on its share). Nothing checks it against that list.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("device", Required=Newtonsoft.Json.Required.Always)]
         [YamlDotNet.Serialization.YamlMemberAttribute(Alias="device")]
-        [System.ComponentModel.DescriptionAttribute("What is on the line: one of the lab\'s wiredDevices in K:\\config\\device-dictionary" +
-            ".json. Nothing checks it against that list.")]
+        [System.ComponentModel.DescriptionAttribute("What is on the line: one of the wiredDevices in the lab\'s device dictionary (conf" +
+            "ig\\device-dictionary.json on its share). Nothing checks it against that list.")]
         public string Device
         {
             get
