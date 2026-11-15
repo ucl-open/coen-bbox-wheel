@@ -178,3 +178,10 @@ Raised by the independent audit and kept as they are; do not raise again without
 - A clearer error than YamlDotNet's "Property 'trigger0Frequency' not found" for a file in the old layout: README quotes it, rig-setup's Hardware panel marks such a file in red, and GEEK-BBOX1, the only rig on it, is regrouped.
 - `RigDevice` reading `Name` once when the workflow is built, not per element: Bonsai's convention for a property nothing maps.
 - `camera.box.triggerFrequency` beside the board's `trigger0Frequency`: the upstream schema's field; the template's header says this rig takes the rate from the board.
+
+
+### Audit round 1 of 3 (15 Nov 2026, stage C): not changed
+
+Do not raise again without new information:
+
+- rig.yml read through `BehaviourBoxRig`, not `LabRig`: `BehaviourBoxRig` is lib-open-rigs' own model, a box's choice of `LabRig`'s parts, not a second reader.
