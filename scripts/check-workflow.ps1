@@ -266,7 +266,7 @@ if ($Step -eq 'Checks') {
         if (($schemas -join ', ') -eq 'Settings_Rig, Settings_Experiment' -and $wf -notmatch 'SessionJson') { "  ok    main.bonsai writes Settings_Rig and Settings_Experiment with LogDataSchema" }
         else { "  FAIL  main.bonsai's LogDataSchema writes '$($schemas -join ', ')', not Settings_Rig, Settings_Experiment, or it still names SessionJson"; $failed++ }
         # The camera's .mkv and CSV (harpTime, frameId, cameraClockNs, exposureUs, gainDb) are LogVideoFfmpeg's, as the domes'.
-        if ($wf -match 'OpenRigs\.Logging:LogVideoFfmpeg\.bonsai' -and $wf -notmatch 'xsi:type="(ffm:VideoWriter|io:CsvWriter|cv:VideoWriter)"') { "  ok    main.bonsai records the camera with LogVideoFfmpeg and writes no video or CSV of its own" }
+        if ($wf -match 'OpenRigs\.Logging:LogVideoFfmpeg\.bonsai' -and $wf -notmatch 'xsi:type="(io:CsvWriter|cv:VideoWriter)"') { "  ok    main.bonsai records the camera with LogVideoFfmpeg and writes no video or CSV of its own" }
         else { "  FAIL  main.bonsai does not record the camera with LogVideoFfmpeg, or writes a video or CSV of its own"; $failed++ }
     } finally { Remove-Item $experiment -Recurse -Force -ErrorAction SilentlyContinue }
 
