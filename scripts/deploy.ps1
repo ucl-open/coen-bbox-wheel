@@ -31,8 +31,8 @@ if (Test-Path -Path ./.venv) {
 Assert-Success "uv venv"
 .\.venv\Scripts\Activate.ps1
 Write-Output "Synchronizing environment..."
-&uv sync
-Assert-Success "uv sync"
+&uv sync --locked
+Assert-Success "uv sync --locked"
 
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     throw "The 'dotnet' command was not found. Install the .NET SDK: https://dotnet.microsoft.com/download"
@@ -83,7 +83,7 @@ if (Test-Path -Path $rigConfig) {
 }
 
 Write-Output "Creating a Bonsai environment and installing packages..."
-&.\.bonsai\Setup.cmd
+& .\.bonsai\Setup.ps1
 Assert-Success "Installing Bonsai and its packages"
 
 # The editor reads its window layout from a per-machine file (gitignored), which a save in the

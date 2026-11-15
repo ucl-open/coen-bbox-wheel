@@ -1,5 +1,9 @@
 # Backlog
 
+## Audit round 2 of 3 (15 Nov 2026, stage C)
+
+- Nothing changed beyond the fixes: `scripts\deploy.ps1` uses `uv sync --locked` and runs `.bonsai\Setup.ps1`, checking its exit code; `.bonsai\Bonsai.config` pins Bonsai.Dsp and Bonsai.System 2.9.0 as the other repos do; the README names app-rig-setup's `workflows\update-workflows.ps1` and the `RigHardware.json` path.
+
 ## Open
 
 - **Done 14 Nov 2026: `videoEncoder` names `h264_qsv`.** lib-open-rigs d8b90c5 made `codec` a string held to its three names by a pattern: as a `Literal` it became a C# enum, and the workflow's YAML reader took only the enum's C# names, so `codec: h264_qsv` stopped `RigConfig` at Start. The template now has `videoEncoder: {codec: h264_qsv}`. Still untested on a box: the writer on the N150's Quick Sync in a 30-minute run (90,000 frames == 90,000 CSV rows, CPU, no dropped-frame warning) on GEEK-BBOX1. A rig.yml deployed before this has no `videoEncoder` and encodes with `libx264` until one is added.
