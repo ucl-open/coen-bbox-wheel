@@ -1,5 +1,9 @@
 # Backlog
 
+## Audit cycle 5 (15 Nov 2026)
+
+- First pytest tests (`tests\test_rig_template.py`, pytest in the `dev` group): the template is what `examples\rig.py` writes (e118138's stale template fails it), it loads as `BehaviourBoxRig`, and `regenerate-schemas` exits with sgen's code (054f823's carry-on fails it). `check-workflow.ps1` fails on a template value still `CHANGE-ME` that its Replace does not fill (it would have built as the text) and fills `rigId` as S1, a box's code, not B1. `deploy.ps1`'s Quick Sync warning says the workflow then stops after Go and to set `codec: libx264`.
+
 ## Audit cycle 4 (15 Nov 2026)
 
 - Deleted what nothing used: `task.py`'s `reader` and `data_reader` imports and `rig.py`'s `LiveView` re-export (schema, generated C# and rig template regenerate byte-identical); `pyproject.toml`'s commented-out `[project.urls]`; the `.gitignore` lines for `Bonsai/Settings/`, C extensions, PyInstaller, installer logs, Sphinx, Jupyter, IPython and pyenv (`git status --ignored` unchanged); the inline `RunningWheel`'s two `ExternalizedMapping` nodes copied from the include, which nothing set (check-workflow, and a headless run to "The port 'COM97' does not exist"). This file's finished history is cut to one line per item, and the "not changed" reasons that later code overturned (the 29 Oct tool-restore order and `os.system`, the inline `StreamController`, `RecordedFrames`, deploy keeping a machine's layout) are gone; the stories are in git log.

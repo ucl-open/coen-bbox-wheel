@@ -44,3 +44,8 @@ required-version = '>=0.8.4'
 [tool.uv.sources]
 open-rigs = {git = "https://github.com/Coen-Lab/lib-open-rigs", rev = "a5fbed1fa601ae55f98622dec3b2f54c1c85e1b8"}
 swc-aeon = { git = "https://github.com/SainsburyWellcomeCentre/aeon_api.git", branch = "main" }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]

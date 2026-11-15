@@ -110,6 +110,6 @@ if (-not $ffmpeg) {
     if ($LASTEXITCODE -eq 0) {
         Write-Output "FFmpeg found, Intel Quick Sync encoding works."
     } else {
-        Write-Warning "FFmpeg is installed, but Intel Quick Sync (h264_qsv) does not work on this machine."
+        Write-Warning "FFmpeg is installed, but Intel Quick Sync (h264_qsv) does not work on this machine: with rig.yml's videoEncoder codec h264_qsv, the template's, the workflow stops when the first video opens, after Go. Set codec: libx264 in $rigConfig to encode in software."
     }
 }
