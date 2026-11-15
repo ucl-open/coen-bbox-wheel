@@ -1,5 +1,9 @@
 # Backlog
 
+## Audit cycle 3 (15 Nov 2026)
+
+- `scripts\deploy.ps1` no longer copies `config\main.layout` itself: `.bonsai\Setup.ps1`, which it runs, does the same copy through lib-open-rigs' `setup-bonsai.ps1` (tested: a changed machine layout replaced, the old one kept as `main.saved.layout`). `check-workflow.ps1` step 4 drops its own writer refusal, which step 5's `workflow_lint` makes by type (tested with a CsvWriter, VideoWriter and FfmpegVideoWriter), its checks for `ext:HarpDeviceSchema` and `SessionJson` (no C# class left, so step 2 fails on them) and an unused temp folder. `main.bonsai` drops five unused namespaces (`dsp`, `sys`, `cv`, `zmq`, `netmq`; check-workflow and a headless run to "The port 'COM97' does not exist"). `THIRD-PARTY-NOTICES.md` names every package as lib-open-rigs' under its BSD 3-Clause `LICENSE` (it called the lab's MIT and named 0.1.0 files). The "Re-pin open-rigs once rig-config-resolver is merged" item is gone: `pyproject.toml` pins Coen-Lab/lib-open-rigs `main`.
+
 ## Audit cycle 2 (15 Nov 2026)
 
 - `scripts\deploy.ps1` stops with exit 1 on a failed cmdlet or .NET call (`$ErrorActionPreference = 'Stop'`): a rig.yml it could not write, or a layout it could not copy, printed the error and exited 0. The Quick Sync probe stays a warning. `scripts\check-workflow.ps1`'s C# build takes stderr without dying on it (Windows PowerShell makes a merged stderr line fatal under 'Stop').
@@ -125,7 +129,6 @@ On GEEK-BBOX1, test config, harness talking to the control port directly (not ri
 
 - Switch to released OpenRigs packages once open-rigs publishes one with the camera fixes and the config operators ([lib-open-rigs](https://github.com/Coen-Lab/lib-open-rigs) `patches/README.md`, "Switching to upstream").
 - Move `copier.yml` handling to upstream once roadmap#38's fix lands, then `copier update` from `gh:open-rigs/open-rigs`.
-- Re-pin `open-rigs` in `pyproject.toml` once `rig-config-resolver` is merged. The current `rev` is a commit on that unmerged branch, which can become unfetchable if the branch is squash-merged and deleted.
 
 ## rig-setup
 

@@ -88,22 +88,12 @@ if (Test-Path -Path $rigConfig) {
 
 Write-Output "Creating a Bonsai environment and installing packages..."
 # A missing script is a non-terminating error and leaves $LASTEXITCODE as it was, so check first.
+# Setup.ps1 runs lib-open-rigs' setup-bonsai.ps1, which also puts config\main.layout (the camera
+# preview and the camera's exposure and gain) in the editor's per-machine .bonsai\Settings\src\main.layout,
+# keeping a different one beside it as main.saved.layout.
 if (-not (Test-Path -Path .\.bonsai\Setup.ps1)) { throw ".bonsai\Setup.ps1 was not found. The deploy is incomplete." }
 & .\.bonsai\Setup.ps1
 Assert-Success "Installing Bonsai and its packages"
-
-# The editor reads its window layout from a per-machine file (gitignored), which a save in the
-# editor overwrites. The workflow's layout is config\main.layout: the 5 Hz camera preview and the
-# camera's exposure and gain (Hardware > Camera), open at Start. It replaces the machine's every
-# deploy; a different one is kept beside it as main.saved.layout.
-$layout = ".\.bonsai\Settings\src\main.layout"
-New-Item -ItemType Directory -Path (Split-Path -Parent $layout) -Force | Out-Null
-if ((Test-Path -Path $layout) -and ((Get-FileHash $layout).Hash -ne (Get-FileHash ".\config\main.layout").Hash)) {
-    Copy-Item $layout ".\.bonsai\Settings\src\main.saved.layout" -Force
-    Write-Output "Kept the machine's own layout as .bonsai\Settings\src\main.saved.layout."
-}
-Copy-Item ".\config\main.layout" $layout -Force
-Write-Output "$layout is config\main.layout (camera preview and exposure and gain open at Start)."
 
 # The video is encoded by ffmpeg.exe, which LogVideoFfmpeg starts from PATH (or rig.yml's
 # videoEncoder.ffmpegPath), with rig.yml's videoEncoder.codec (h264_qsv, Intel Quick Sync, on the

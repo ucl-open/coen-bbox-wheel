@@ -11,12 +11,12 @@ param(
 #      ExperimentManifest expects, and that each window in config\main.layout is on a node it fits.
 #   3. Runs OpenRigs.Core's RigDevice on config\rig-template.yml: the names the workflow asks for
 #      are found; and every key in it reaches the Settings_Rig JSON the experiment logs.
-#   4. No dump or register map of the workflow's own, the settings files written by
-#      OpenRigs.Logging's LogDataSchema, the camera recorded by LogVideoFfmpeg with no writer of the
-#      workflow's own, and CameraOverrides' refusal without a "Parameter name" line; in main.bonsai,
-#      every timeout is an OpenRigs.Core GapWatchdog or StartupWatchdog with a message.
-#   5. Every file the workflow writes is named in ExperimentManifest's ExpectedFiles, with its condition
-#      (open-rigs' workflow_lint.expected_files_problems, as the domes' tests run it).
+#   4. No dump of the workflow's own, the settings files written by OpenRigs.Logging's LogDataSchema,
+#      the camera recorded by LogVideoFfmpeg, and CameraOverrides' refusal without a "Parameter name"
+#      line; in main.bonsai, every timeout is an OpenRigs.Core GapWatchdog or StartupWatchdog with a message.
+#   5. Every file the workflow writes is named in ExperimentManifest's ExpectedFiles, with its condition,
+#      and no writer of its own (CsvWriter, VideoWriter, FfmpegVideoWriter ...) writes a file it cannot
+#      name (open-rigs' workflow_lint.expected_files_problems, as the domes' tests run it).
 # Needs a deployed clone (scripts\deploy.cmd: .bonsai\Packages). Exit 0 when all five pass.
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
@@ -252,24 +252,22 @@ if ($Step -eq 'Checks') {
     function Get-Refusal([scriptblock]$Run) {
         try { & $Run; return $null } catch { $x = $_.Exception; while ($x.InnerException) { $x = $x.InnerException }; return $x }
     }
-    $experiment = Join-Path ([IO.Path]::GetTempPath()) ("hds-" + [guid]::NewGuid().ToString('N'))
-    try {
-        # The board's dump and register map come from RecordHarpDevices (OpenRigs.HarpDevices), from
-        # rig.yml: nothing in the workflow asks the board for its dump or names its register map itself.
-        $wf = Get-Content (Join-Path $repo 'src\main.bonsai') -Raw
-        if ($wf -match 'DumpRegisters>true</harp:DumpRegisters>\s*<harp:MuteReplies' -or $wf -match 'ext:HarpDeviceSchema' -or $wf -match '>BehaviorCommands<') {
-            "  FAIL  main.bonsai still asks for the board's dump, writes its register map, or names its commands BehaviorCommands, itself"; $failed++
-        } else { "  ok    main.bonsai leaves the board's dump and register map to RecordHarpDevices" }
-        # The settings files (Settings\Settings_Rig_<DateTime>.json, Settings\Settings_Experiment_<DateTime>.json) are
-        # OpenRigs.Logging's LogDataSchema, as the dome tasks write theirs.
-        $schemas = [regex]::Matches($wf, 'Path="OpenRigs\.Logging:LogDataSchema\.bonsai">\s*<Name>([^<]+)</Name>') | ForEach-Object { $_.Groups[1].Value }
-        if (($schemas -join ', ') -eq 'Settings_Rig, Settings_Experiment' -and $wf -notmatch 'SessionJson') { "  ok    main.bonsai writes Settings_Rig and Settings_Experiment with LogDataSchema" }
-        else { "  FAIL  main.bonsai's LogDataSchema writes '$($schemas -join ', ')', not Settings_Rig, Settings_Experiment, or it still names SessionJson"; $failed++ }
-        # The camera's .mkv and CSV (harpTime, frameId, cameraClockNs, exposureUs, gainDb) are LogVideoFfmpeg's, as the domes'.
-        # A writer of its own is refused by type under any prefix: FfmpegVideoWriter is the one the lab uses (15 Nov 2026).
-        if ($wf -match 'OpenRigs\.Logging:LogVideoFfmpeg\.bonsai' -and $wf -notmatch 'xsi:type="(\w+:)?(CsvWriter|VideoWriter|FfmpegVideoWriter)"') { "  ok    main.bonsai records the camera with LogVideoFfmpeg and writes no video or CSV of its own" }
-        else { "  FAIL  main.bonsai does not record the camera with LogVideoFfmpeg, or writes a video or CSV of its own"; $failed++ }
-    } finally { Remove-Item $experiment -Recurse -Force -ErrorAction SilentlyContinue }
+    # The board's dump comes from RecordHarpDevices (OpenRigs.HarpDevices), from rig.yml: nothing in
+    # the workflow asks the board for its dump itself. (A register map or settings writer of the
+    # workflow's own, ext:HarpDeviceSchema or SessionJson, has no C# class left, so step 2 fails on it.)
+    $wf = Get-Content (Join-Path $repo 'src\main.bonsai') -Raw
+    if ($wf -match 'DumpRegisters>true</harp:DumpRegisters>\s*<harp:MuteReplies' -or $wf -match '>BehaviorCommands<') {
+        "  FAIL  main.bonsai still asks for the board's dump itself, or names its commands BehaviorCommands"; $failed++
+    } else { "  ok    main.bonsai leaves the board's dump to RecordHarpDevices" }
+    # The settings files (Settings\Settings_Rig_<DateTime>.json, Settings\Settings_Experiment_<DateTime>.json) are
+    # OpenRigs.Logging's LogDataSchema, as the dome tasks write theirs.
+    $schemas = [regex]::Matches($wf, 'Path="OpenRigs\.Logging:LogDataSchema\.bonsai">\s*<Name>([^<]+)</Name>') | ForEach-Object { $_.Groups[1].Value }
+    if (($schemas -join ', ') -eq 'Settings_Rig, Settings_Experiment') { "  ok    main.bonsai writes Settings_Rig and Settings_Experiment with LogDataSchema" }
+    else { "  FAIL  main.bonsai's LogDataSchema writes '$($schemas -join ', ')', not Settings_Rig, Settings_Experiment"; $failed++ }
+    # The camera's .mkv and CSV (harpTime, frameId, cameraClockNs, exposureUs, gainDb) are LogVideoFfmpeg's, as the domes'.
+    # A CsvWriter, VideoWriter or FfmpegVideoWriter of the workflow's own is refused by step 5 (workflow_lint's writers).
+    if ($wf -match 'OpenRigs\.Logging:LogVideoFfmpeg\.bonsai') { "  ok    main.bonsai records the camera with LogVideoFfmpeg" }
+    else { "  FAIL  main.bonsai does not record the camera with LogVideoFfmpeg"; $failed++ }
 
     # The Rx operators below run on worker threads: load everything now and drop the resolver,
     # as the RigDevice step does, so no scriptblock is called from those threads.
