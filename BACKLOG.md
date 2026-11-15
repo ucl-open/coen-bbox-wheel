@@ -3,6 +3,7 @@
 ## 15 Nov 2026: Pip's decisions after the audit cycles
 
 - `deploy.ps1` runs bonsai.sgen once, in `regenerate-schemas` (same `Generated.cs` byte for byte), and drops `git submodule update` (no submodules) and the `calibration\` folder (the box has none). The unused task model (`task.py`, `examples\task.py`), open_rigs' `ExperimentSession` and `pydantic-settings` are gone: the schema and generated C# hold `BehaviourBoxRig` only. `swc-aeon` is pinned to the commit `uv.lock` held (Pip: pinned in all repos), not a branch.
+- Licensed BSD 3-Clause, as lib-open-rigs (Pip): `LICENSE` is lib-open-rigs' with the holder "Coen Lab, University College London", and `pyproject.toml` says `BSD-3-Clause`, not MIT.
 
 ## Audit cycle 5 (15 Nov 2026)
 

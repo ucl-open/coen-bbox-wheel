@@ -6,7 +6,7 @@ build-backend = "uv_build"
 name = "ucl-open-coen-behaviour-box"
 description = "A library that defines an open-rigs data schema for the coen-behaviour-box experiment."
 authors = [ {name = "Pip Coen", email = "pipcoen@gmail.com"}]
-license = "MIT"
+license = "BSD-3-Clause"
 requires-python = ">=3.11, <3.12"
 classifiers = [
     "Programming Language :: Python :: 3.11",
