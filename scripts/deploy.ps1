@@ -1,6 +1,6 @@
 param(
     # Root of the per-machine rig configuration directories. The rig workflow reads
-    # <ConfigRoot>\<MACHINE-NAME>\rig.yml and calibration artefacts beside it. In
+    # <ConfigRoot>\<MACHINE-NAME>\rig.yml. In
     # Coen-Lab-Local with the lab's other local files (Pip, 29 Oct 2026); app-rig-setup
     # moved C:\RigConfigs there and left a link at the old place.
     [string]$ConfigRoot = "C:\Coen-Lab-Local\RigConfigs"
@@ -18,10 +18,6 @@ Set-Location (Split-Path -Parent $scriptDirectory)
 function Assert-Success([string]$Step) {
     if ($LASTEXITCODE -ne 0) { throw "$Step failed (exit code $LASTEXITCODE). The deploy is incomplete." }
 }
-
-Write-Output "Initializing and updating submodules..."
-&git submodule update --init --recursive
-Assert-Success "git submodule update"
 
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
     throw "The 'uv' command was not found. See https://docs.astral.sh/uv/getting-started/installation/ for instructions."
@@ -47,24 +43,9 @@ Write-Output "Restoring dotnet tools..."
 &dotnet tool restore
 Assert-Success "dotnet tool restore"
 
-Write-Output "Regenerating JSON schema from pydantic models..."
+Write-Output "Regenerating the JSON schema and C# classes from the pydantic models..."
 &uv run --locked regenerate-schemas
 Assert-Success "Regenerating the schemas"
-
-# Derive C# namespace from schema filename (snake_case -> PascalCase).
-$schemaFile = Get-ChildItem ".\src\DataSchemas\*.json" | Select-Object -First 1
-if (-not $schemaFile) { throw "No JSON schema found in .\src\DataSchemas\. Run 'uv run --locked regenerate-schemas' first." }
-$namespace = ($schemaFile.BaseName -split "_" | ForEach-Object { $_.Substring(0,1).ToUpper() + $_.Substring(1) }) -join ""
-
-if (-not (Test-Path -Path src\Extensions)) {
-    New-Item -ItemType Directory -Path src\Extensions | Out-Null
-}
-
-Write-Output "Generating C# classes (namespace: $namespace, serializers: json yaml)..."
-Push-Location .\src\Extensions
-&dotnet bonsai.sgen $schemaFile.FullName --namespace $namespace --serializer json --serializer yaml
-Pop-Location
-Assert-Success "Generating the C# classes"
 
 Write-Output "Writing the rig configuration template..."
 &uv run --locked python examples/rig.py
@@ -73,7 +54,7 @@ Assert-Success "Writing the rig configuration template"
 # Same name the rig workflow resolves at startup (Environment.MachineName).
 $machineDirectory = Join-Path $ConfigRoot ([Environment]::MachineName)
 Write-Output "Preparing the rig configuration directory $machineDirectory..."
-New-Item -ItemType Directory -Path (Join-Path $machineDirectory "calibration") -Force | Out-Null
+New-Item -ItemType Directory -Path $machineDirectory -Force | Out-Null
 $rigConfig = Join-Path $machineDirectory "rig.yml"
 if (Test-Path -Path $rigConfig) {
     Write-Output "Keeping the existing $rigConfig"
