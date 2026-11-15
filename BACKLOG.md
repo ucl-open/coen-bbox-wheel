@@ -1,5 +1,9 @@
 # Backlog
 
+## 15 Nov 2026: Pip's decisions after the audit cycles
+
+- `deploy.ps1` runs bonsai.sgen once, in `regenerate-schemas` (same `Generated.cs` byte for byte), and drops `git submodule update` (no submodules) and the `calibration\` folder (the box has none). The unused task model (`task.py`, `examples\task.py`), open_rigs' `ExperimentSession` and `pydantic-settings` are gone: the schema and generated C# hold `BehaviourBoxRig` only. `swc-aeon` is pinned to the commit `uv.lock` held (Pip: pinned in all repos), not a branch.
+
 ## Audit cycle 5 (15 Nov 2026)
 
 - First pytest tests (`tests\test_rig_template.py`, pytest in the `dev` group): the template is what `examples\rig.py` writes (e118138's stale template fails it), it loads as `BehaviourBoxRig`, and `regenerate-schemas` exits with sgen's code (054f823's carry-on fails it). `check-workflow.ps1` fails on a template value still `CHANGE-ME` that its Replace does not fill (it would have built as the text) and fills `rigId` as S1, a box's code, not B1. `deploy.ps1`'s Quick Sync warning says the workflow then stops after Go and to set `codec: libx264`.
@@ -88,7 +92,6 @@ Do not raise again without new information.
 Do not raise again without new information.
 
 - Unused template packages in `.bonsai/Bonsai.config` (Sleap, Pylon, TensorFlow and others): harmless, and keeping parity with the template eases `copier update`.
-- `swc-aeon` from a git branch in `pyproject.toml`: `uv.lock` pins the commit and deploy installs from the lock.
 - Unused PulseController classes and the `version` Literal in the rig schema: both come from the upstream schema and break nothing today.
 - Rebuilding the local packages to compare hashes: the patches (now commits in lib-open-rigs) applied to 3788bfb reproduce the built source tree exactly, and nupkg hashes are not deterministic.
 - Sending `StopCameras` at startup: the Behavior firmware stops the camera outputs whenever the board goes to Standby, which Bonsai does on disconnect; only a hard crash leaves them running.
