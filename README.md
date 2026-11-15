@@ -65,7 +65,7 @@ If no frame arrives for 15 s, the workflow stops with "No frame from the camera 
 
 ## Experiment manifest
 
-Every experiment folder gets a `manifest.json` (`Logging` > `ExperimentManifest`, the OpenRigs.Manifest package from lib-open-rigs; format: its [`FORMAT.md`](https://github.com/Coen-Lab/lib-open-rigs/blob/main/src/OpenRigs.Manifest/FORMAT.md), version 2). It finds the experiment folder (`PathPrefix`) itself; its one input is the frames recorded. It is written when the experiment folder exists and again when the run ends:
+Every experiment folder gets a `manifest.json` (`Logging` > `ExperimentManifest`, the OpenRigs.Manifest package from lib-open-rigs; format: its [`FORMAT.md`](https://github.com/Coen-Lab/lib-open-rigs/blob/main/src/OpenRigs.Manifest/FORMAT.md), version 3). It finds the experiment folder (`PathPrefix`) itself; its one input is the frames recorded. It is written when the experiment folder exists and again when the run ends:
 - the machine, the subject and session from the folder name;
 - this repo's commit and whether the clone was dirty;
 - Bonsai's command line with each `--property` value;
@@ -73,7 +73,7 @@ Every experiment folder gets a `manifest.json` (`Logging` > `ExperimentManifest`
 - `rig.yml` as read at Start, with its sha256;
 - how the run ended: `completed` when the run length's frames were written, `error` with a Watchdog's message, `stopped` after a controller stop (with its reason), `ended-early` when the workflow stopped any other way;
 - `expected`: a folder for each device in `rig.yml` this workflow publishes (`BehaviorBoard-Main/`, `Camera-Overhead/`), each Harp device's `_device.json` and `.yml` (`harp`), and `Settings/Settings_Rig_` and `Settings/Settings_Experiment_`, each settings file on its own, with how many files each holds;
-- every file in the folder with its size. Its `status` is `partial`: the overnight copy (rig-setup's `rig-sync.ps1`) checks every listed file is present and closed, adds sizes and hashes, writes `complete`, and only then copies the experiment to the server, the manifest last. A listed file that is missing, or an expected folder holding nothing (a board that never logged), stops that experiment's copy and raises an alarm on the rig's health report. `ingest_script` is `coen-behaviour-box`, the name the server's ingest registry runs for this data. Errors on the board's logging chain do not reach the node, so an experiment whose board log failed reads `ended-early`, not `error`; its empty `BehaviorBoard-Main/` is what says so.
+- every file in the folder with its size. The workflow is the manifest's only writer: the overnight copy (jacuzzi-ingest's `ingest-rig`) checks every listed file is present and closed, hashes each into its own `sync.json`, and only then copies the experiment to the server, `manifest.json` and then `sync.json` last. For a `completed` run, a listed file that is missing, or an expected folder holding nothing (a board that never logged), stops that experiment's copy and raises an alarm in the rig's sync record; a run that did not complete is copied with the gap noted and an alarm. `ingest_script` is `coen-behaviour-box`, the name the server's ingest registry runs for this data. Errors on the board's logging chain do not reach the node, so an experiment whose board log failed reads `ended-early`, not `error`; its empty `BehaviorBoard-Main/` is what says so.
 
 ## Live view
 

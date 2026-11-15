@@ -25,7 +25,7 @@ HEADER = """\
 # hardware differs.
 rig = BehaviourBoxRig(
     rig_id="CHANGE-ME",
-    # The acquisition folder itself, which rig-sync copies and rig-control reads: sub-* sit in it,
+    # The acquisition folder itself, which the overnight copy (jacuzzi-ingest's ingest-rig) copies and app-rig-control reads: sub-* sit in it,
     # with no project folder (the server keeps <RIG>/sub/ses).
     root_path="C:\\Coen-Lab-Local\\Acquired-Data",
     behavior_board={
