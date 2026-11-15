@@ -258,7 +258,7 @@
                   </Expression>
                   <Expression xsi:type="GroupWorkflow">
                     <Name>RunningWheel</Name>
-                    <Description>Sets up the running wheel's encoder on port 2 in Position mode, as av-dome does, so the board's AnalogData (register 44) carries the absolute encoder count, logged raw. The OpenRigs.Devices RunningWheel include sets Displacement and then differences and accumulates it, which yields a speed sample rather than a distance; distance is computed offline from the raw count with countsPerRev and wheelDiameterMm in rig.yml.</Description>
+                    <Description>Sets up the running wheel's encoder on port 2 in Position mode, as av-dome does, so the board's AnalogData (register 44) carries the absolute encoder count, logged raw. Inline, from when the OpenRigs.Devices RunningWheel include set Displacement and then differenced it (a speed sample, not a distance); that include reads Position too since OpenRigs.Devices 0.1.1-coen-lab.6, and also publishes a distance this workflow does not use. Distance is computed offline from the raw count with countsPerRev and wheelDiameterMm in rig.yml.</Description>
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="beh:CreateMessage">
@@ -471,7 +471,7 @@
             </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>Camera</Name>
-              <Description>Frames paired with Harp trigger times. Triggers are Event messages only: the CameraTriggerController subject also carries the register-dump Read reply, which is not a trigger. OpenRigs.Video TriggeredSpinnaker, given the triggers, copies FrameID and Timestamp inside the camera callback, fills FrameID gaps and then pairs frames with triggers, so a dropped frame does not shift later times. Subscribed once rig.yml is read (RigConfig), at Start and before Go, so the preview streams in ready mode; the first frame reports Ready to the controller. GapWatchdog stops the workflow with a message of its own if no frame arrives for 15 s (usually the trigger cable). The frames are published as Camera-Overhead.Data, which the live view streams; Value.Image and SampleInterval take 5 images a second from them for the editor's preview window (config\main.layout), from Start, so it shows the camera in ready mode, and the last three nodes show beside it the exposure and gain the camera reports for its frames (CameraSettings). CameraExposureUs and CameraGainDb are experiment parameters: each starts at Camera-Overhead's (rig.yml's) value and takes each value the controller sets (OnParameterSet) straight to the open camera, so the preview shows the change while ready; Go fixes them. One second after Start, once the controller's server is up, ParameterDefault shows rig.yml's values as the parameters' values, and ParameterMaximum limits a set exposure to the trigger period less 1000 us, so a longer one is refused at the controller instead of stopping the workflow. Binning is taken only when the camera opens.</Description>
+              <Description>Frames paired with Harp trigger times. Triggers are Camera0Frame Event messages from BehaviorBoard-Main.Data only: the board's events also carry the register dump's Read reply of Camera0Frame, which is not a trigger (CameraTriggerController's own Camera0TriggerEvents does not filter it out, so it is not used). OpenRigs.Video TriggeredSpinnaker, given the triggers, copies FrameID and Timestamp inside the camera callback, fills FrameID gaps and then pairs frames with triggers, so a dropped frame does not shift later times. Subscribed once rig.yml is read (RigConfig), at Start and before Go, so the preview streams in ready mode; the first frame reports Ready to the controller. GapWatchdog stops the workflow with a message of its own if no frame arrives for 15 s (usually the trigger cable). The frames are published as Camera-Overhead.Data, which the live view streams; Value.Image and SampleInterval take 5 images a second from them for the editor's preview window (config\main.layout), from Start, so it shows the camera in ready mode, and the last three nodes show beside it the exposure and gain the camera reports for its frames (CameraSettings). CameraExposureUs and CameraGainDb are experiment parameters: each starts at Camera-Overhead's (rig.yml's) value and takes each value the controller sets (OnParameterSet) straight to the open camera, so the preview shows the change while ready; Go fixes them. One second after Start, once the controller's server is up, ParameterDefault shows rig.yml's values as the parameters' values, and ParameterMaximum limits a set exposure to the trigger period less 1000 us, so a longer one is refused at the controller instead of stopping the workflow. Binning is taken only when the camera opens.</Description>
               <Workflow>
                 <Nodes>
                   <Expression xsi:type="SubscribeSubject">
@@ -733,7 +733,7 @@
             </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>RecordVideo</Name>
-              <Description>Subscribed only once PathPrefix exists: Take reads its Count at subscription. Records the run length's worth of frames (RunLengthToFrames) with OpenRigs.Logging's LogVideoFfmpeg: one-hour chunks on the frames' Harp time, as the board's log is, each to &lt;Name&gt;\&lt;Name&gt;_&lt;DateTime&gt;.mkv and .csv, Name being the camera's from its subject (Camera-Overhead). The CSV has one row per video frame: harpTime (the Harp time of the frame's trigger), frameId, cameraClockNs, and exposureUs and gainDb as the camera reports them for that frame. The codec and ffmpeg.exe are rig.yml's videoEncoder (h264_qsv on the boxes; without it libx264, in software), read under ConfigRoot as each file opens (through StringProperty, so the Logging mapping it shares with RecordHarpDevices sees a string, not the unloaded include's untyped property); a missing ffmpeg.exe or unknown codec stops the workflow then. The writer keeps Bonsai open until each file is closed. SampleInterval here samples the recorded frames, 5 a second; the editor's preview window (config\main.layout) is on Hardware &gt; Camera's last node instead, which takes every camera frame from Start, so it shows the camera in ready mode.</Description>
+              <Description>Subscribed only once PathPrefix exists: Take reads its Count at subscription. Records the run length's worth of frames (RunLengthToFrames) with OpenRigs.Logging's LogVideoFfmpeg: one-hour chunks on the frames' Harp time, as the board's log is, each to &lt;Name&gt;\&lt;Name&gt;_&lt;DateTime&gt;.mkv and .csv, Name being the camera's from its subject (Camera-Overhead). The CSV has one row per video frame: harpTime (the Harp time of the frame's trigger), frameId, cameraClockNs, and exposureUs and gainDb as the camera reports them for that frame. The codec and ffmpeg.exe are rig.yml's videoEncoder (h264_qsv on the boxes; without it libx264, in software), read under ConfigRoot as each file opens (through StringProperty, so the Logging mapping it shares with RecordHarpDevices sees a string, not the unloaded include's untyped property); a missing ffmpeg.exe or unknown codec stops the workflow then. The writer keeps Bonsai open until each file is closed. The editor's preview window (config\main.layout) is on Hardware &gt; Camera's SampleInterval, which takes every camera frame from Start, so it shows the camera in ready mode.</Description>
               <Workflow>
                 <Nodes>
                   <Expression xsi:type="WorkflowInput">
@@ -790,14 +790,6 @@
                     </PropertyMappings>
                   </Expression>
                   <Expression xsi:type="WorkflowOutput" />
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Value.Image</Selector>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:SampleInterval">
-                    <rx:Interval>PT0.2S</rx:Interval>
-                  </Combinator>
-                  </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>BehaviorBoard-Main</Name>
                   </Expression>
@@ -827,14 +819,12 @@
                   <Edge From="3" To="4" Label="Source1" />
                   <Edge From="5" To="6" Label="Source1" />
                   <Edge From="6" To="4" Label="Source2" />
-                  <Edge From="10" To="11" Label="Source1" />
-                  <Edge From="11" To="4" Label="Source3" />
-                  <Edge From="12" To="13" Label="Source1" />
-                  <Edge From="13" To="14" Label="Source1" />
-                  <Edge From="14" To="4" Label="Source4" />
-                  <Edge From="4" To="7" Label="Source1" />
-                  <Edge From="3" To="8" Label="Source1" />
                   <Edge From="8" To="9" Label="Source1" />
+                  <Edge From="9" To="4" Label="Source3" />
+                  <Edge From="10" To="11" Label="Source1" />
+                  <Edge From="11" To="12" Label="Source1" />
+                  <Edge From="12" To="4" Label="Source4" />
+                  <Edge From="4" To="7" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -961,7 +951,7 @@
       </Expression>
       <Expression xsi:type="lv:StreamDevices">
         <Name>LiveView</Name>
-        <Description>Streams every device in this machine's rig.yml that the workflow publishes, over ZeroMQ, for the live view (OpenRigs.LiveView, StreamDevices): data on TCP 5556, video on 5558, on every interface, from Start (in ready mode too). Camera-Overhead.Data as Camera-Overhead.video, 5 JPEG frames a second at 320 x 240; BehaviorBoard-Main.Data as BehaviorBoard-Main.encoder, the raw count from AnalogData, 10 a second; each rate and size can be changed in rig.yml under the device's liveView:. Also elapsed, seconds since the experiment folder (PathPrefix) appeared, once a second, and every 5 s liveview: this workflow, its commit, and the devices streamed and skipped and why. Every message carries RigId, the machine's name, and the session key: "ready" until the experiment folder exists, then its name, sub-&lt;SubjectId&gt;/ses-&lt;SessionId&gt;_&lt;start&gt;. Its ConfigRoot is the workflow's, as RigConfig's and RecordHarpDevices' are, so --property:ConfigRoot moves all three. Last in the workflow, because it streams only subjects built before it. A port already in use (another workflow streaming) stops the workflow at Start with NetMQ's AddressAlreadyInUseException, before the camera is triggered.</Description>
+        <Description>Streams every device in this machine's rig.yml that the workflow publishes, over ZeroMQ, for the live view (OpenRigs.LiveView, StreamDevices): data on TCP 5556, video on 5558, on every interface, from Start (in ready mode too). Camera-Overhead.Data as Camera-Overhead.video, 5 JPEG frames a second at 320 x 240; BehaviorBoard-Main.Data as BehaviorBoard-Main.encoder, the raw count from AnalogData, 10 a second; each rate and size can be changed in rig.yml under the device's liveView:. Also elapsed, seconds since the experiment folder (PathPrefix) appeared, once a second, and every 5 s liveview: this workflow, its commit, and the devices streamed and skipped and why. Every message carries RigId, the machine's name, and the session key: "ready" until the experiment folder exists, then its name, sub-&lt;SubjectId&gt;/ses-&lt;SessionId&gt;_&lt;start&gt;. Its ConfigRoot is the workflow's, as RigConfig's, RecordHarpDevices' and Logging &gt; RecordVideo's are, so --property:ConfigRoot moves all four. Last in the workflow, because it streams only subjects built before it. A port already in use (another workflow streaming) stops the workflow at Start with NetMQ's AddressAlreadyInUseException, before the camera is triggered.</Description>
         <lv:ConfigRoot>C:\Coen-Lab-Local\RigConfigs</lv:ConfigRoot>
         <lv:DataPort>5556</lv:DataPort>
         <lv:VideoPort>5558</lv:VideoPort>

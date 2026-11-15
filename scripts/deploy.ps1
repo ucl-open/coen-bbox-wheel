@@ -1,7 +1,7 @@
 param(
     # Root of the per-machine rig configuration directories. The rig workflow reads
     # <ConfigRoot>\<MACHINE-NAME>\rig.yml and calibration artefacts beside it. In
-    # Coen-Lab-Local with the lab's other local files (Pip, 29 Oct 2026); rig-setup
+    # Coen-Lab-Local with the lab's other local files (Pip, 29 Oct 2026); app-rig-setup
     # moved C:\RigConfigs there and left a link at the old place.
     [string]$ConfigRoot = "C:\Coen-Lab-Local\RigConfigs"
 )

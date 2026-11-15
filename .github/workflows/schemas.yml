@@ -4,8 +4,8 @@
 # refusing keys the Python allows. The fix is to run, from the repo root:
 #   uv run regenerate-schemas
 #   uv run python examples/rig.py
-# and commit what they change. lib-open-rigs' update-workflows does this after every push
-# there; this catches an edit made here.
+# and commit what they change. app-rig-setup's workflows\update-workflows.ps1 does this after
+# every lib-open-rigs push; this catches an edit made here.
 
 name: Schemas
 
@@ -34,10 +34,6 @@ jobs:
         run: |
           dotnet tool restore
           uv run regenerate-schemas
-          if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          # regenerate.py does not check its sgen run (BACKLOG), and a failed one leaves the old
-          # C# in place, which would pass as current: run it again, checked.
-          dotnet bonsai.sgen src/DataSchemas/ucl_open_coen_behaviour_box.json --output src/Extensions --serializer json --serializer yaml
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           uv run python examples/rig.py
           if ($LASTEXITCODE) { exit $LASTEXITCODE }

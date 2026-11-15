@@ -1,5 +1,13 @@
 # Backlog
 
+## Audit cycle 1 (15 Nov 2026)
+
+- Names and docs brought up to date: app-rig-control, app-rig-setup and its `update-workflows.ps1`, the Hardware page and `RigHardware.json`'s `boards`, the template's `codec: h264_qsv`, `ConfigRoot` reaching four nodes, the second camera's `EnableTrigger1`, the RunningWheel and Camera descriptions; `RecordVideo`'s unused `SampleInterval` (no window, no reader) removed; the broken `examples\session.py` (`Experiment` never imported) deleted; the schema check no longer runs sgen twice now `regenerate.py` checks its run.
+
+## Audit cycle 1 (15 Nov 2026): not changed
+
+- The inline RunningWheel, though lib-open-rigs' include reads Position since OpenRigs.Devices 0.1.1-coen-lab.6: moving onto it belongs to the planned move onto `LabRig` and `RigHardware` (Open, below).
+
 ## Audit round 3 of 3 (15 Nov 2026)
 
 - `scripts\deploy.ps1` exits 1 naming `.bonsai\Setup.ps1` when it is missing (a missing script left the last exit code, 0), and runs `uv run --locked`.
