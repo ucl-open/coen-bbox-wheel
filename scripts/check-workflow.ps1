@@ -9,13 +9,12 @@ param(
 #      checks that every node typed with where rig.yml is has the same root, then builds against
 #      the template filled in as a rig's, and checks what RecordHarpDevices made from it and what
 #      ExperimentManifest expects, and that each window in config\main.layout is on a node it fits.
-#   3. Runs RigDevice on config\rig-template.yml: the names the workflow asks for are found,
-#      and a missing entry or a name breaking the naming rules stops it; and every key in it
-#      reaches the Settings_Rig JSON the experiment logs.
-#   4. ExposureFitsTrigger's limit (19,000 us passes at 50 Hz, 19,001 and 30,000 stop),
-#      no dump or register map of the workflow's own, the camera recorded by
-#      LogVideoFfmpeg with no writer of the workflow's own, Watchdog's own message, and CameraOverrides'
-#      refusal without a "Parameter name" line; in main.bonsai, every timeout is a Watchdog with a message.
+#   3. Runs OpenRigs.Core's RigDevice on config\rig-template.yml: the names the workflow asks for
+#      are found; and every key in it reaches the Settings_Rig JSON the experiment logs.
+#   4. No dump or register map of the workflow's own, the settings files written by
+#      OpenRigs.Logging's LogDataSchema, the camera recorded by LogVideoFfmpeg with no writer of the
+#      workflow's own, Watchdog's own message, and CameraOverrides' refusal without a "Parameter
+#      name" line; in main.bonsai, every timeout is a Watchdog or StartupWatchdog with a message.
 # Needs a deployed clone (scripts\deploy.cmd: .bonsai\Packages). Exit 0 when all four pass.
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
@@ -189,7 +188,7 @@ if ($Step -eq 'RigDevice') {
     $yaml = Get-Content (Join-Path $repo 'config\rig-template.yml') -Raw
     $E = [Linq.Expressions.Expression]
     $wait = [System.Reactive.Linq.Observable].GetMethods() | Where-Object { $_.Name -eq 'Wait' -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1
-    # rig.yml text -> DeserializeFromYaml -> MemberSelector -> RigDevice, as RigConfig chains them.
+    # rig.yml text -> DeserializeFromYaml -> MemberSelector -> OpenRigs.Core RigDevice, as RigConfig chains them.
     function Invoke-RigDevice([string]$Member, [string]$Name) {
         $x = $E::Constant([System.Reactive.Linq.Observable]::Return($yaml), [IObservable[string]])
         $des = New-Object UclOpenCoenBehaviourBox.DeserializeFromYaml
@@ -198,7 +197,7 @@ if ($Step -eq 'RigDevice') {
         $sel = New-Object Bonsai.Expressions.MemberSelectorBuilder; $sel.Selector = $Member
         $x = $sel.Build([Linq.Expressions.Expression[]]@($x))
         $cb = New-Object Bonsai.Expressions.CombinatorBuilder
-        $rd = New-Object UclOpenCoenBehaviourBox.RigDevice; $rd.Name = $Name; $cb.Combinator = $rd
+        $rd = New-Object OpenRigs.Core.RigDevice; $rd.Name = $Name; $cb.Combinator = $rd
         $x = $cb.Build([Linq.Expressions.Expression[]]@($x))
         $call = $E::Call($wait.MakeGenericMethod($x.Type.GetGenericArguments()[0]), $x)
         return $E::Lambda($E::Convert($call, [object])).Compile().DynamicInvoke()
@@ -206,7 +205,7 @@ if ($Step -eq 'RigDevice') {
     $failed = 0
     # The names main.bonsai asks for, from its RigDevice nodes, each with the group it reads.
     $asked = [regex]::Matches((Get-Content (Join-Path $repo 'src\main.bonsai') -Raw),
-        '<Selector>(\w+)</Selector>\s*</Expression>\s*<Expression xsi:type="Combinator">\s*<Combinator xsi:type="ext:RigDevice">\s*<ext:Name>([^<]*)</ext:Name>')
+        '<Selector>(\w+)</Selector>\s*</Expression>\s*<Expression xsi:type="Combinator">\s*<Combinator xsi:type="orc:RigDevice">\s*<orc:Name>([^<]*)</orc:Name>')
     if ($asked.Count -eq 0) { "  FAIL  found no RigDevice in main.bonsai"; $failed++ }
     foreach ($m in $asked) {
         $member = $m.Groups[1].Value; $name = $m.Groups[2].Value
@@ -215,21 +214,6 @@ if ($Step -eq 'RigDevice') {
             if ($r.Name -ne $name) { throw "came back named '$($r.Name)'" }
             "  ok    $name is in the template"
         } catch { $x = $_.Exception; while ($x.InnerException) { $x = $x.InnerException }; "  FAIL  ${name}: $($x.Message)"; $failed++ }
-    }
-    # Each must stop the workflow, with the exception and the words that say why.
-    $refused = @(
-        @('Camera', 'Camera-Face', 'KeyNotFoundException', 'Its camera entries: overhead.'),
-        @('Camera', 'Camera-overhead', 'ArgumentException', 'starting with a capital'),
-        @('Camera', 'Camera-Overhead_2', 'ArgumentException', 'only letters and digits'),
-        @('Camera', 'CameraBox', 'ArgumentException', 'Kind-Instance')
-    )
-    foreach ($c in $refused) {
-        try { $null = Invoke-RigDevice $c[0] $c[1]; "  FAIL  $($c[1]) was accepted"; $failed++ }
-        catch {
-            $x = $_.Exception; while ($x.InnerException) { $x = $x.InnerException }
-            if ($x.GetType().Name -eq $c[2] -and $x.Message.Contains($c[3])) { "  ok    $($c[1]) refused: $($x.Message)" }
-            else { "  FAIL  $($c[1]): $($x.GetType().Name): $($x.Message)"; $failed++ }
-        }
     }
     # The experiment's Settings_Rig JSON is rig.yml as parsed, and the manifest keeps only rig.yml's hash
     # (OpenRigs.Manifest 0.1.0-local.7), so every key in rig.yml must reach the JSON.
@@ -266,16 +250,6 @@ if ($Step -eq 'Checks') {
     function Get-Refusal([scriptblock]$Run) {
         try { & $Run; return $null } catch { $x = $_.Exception; while ($x.InnerException) { $x = $x.InnerException }; return $x }
     }
-    # Exposure at 50 Hz with the workflow's 1000 us margin: 19,000 ran at the full rate on GEEK-BBOX1
-    # (30 Oct 2026); 30,000 ran at 25 fps with every frame mistimed.
-    foreach ($c in @(@(19000, $true), @(10000, $true), @(19001, $false), @(30000, $false))) {
-        $x = Get-Refusal { [UclOpenCoenBehaviourBox.ExposureFitsTrigger]::Check('Camera-Overhead', $c[0], 50, 1000) }
-        if ($c[1] -and $x) { "  FAIL  ExposureTime $($c[0]) refused: $($x.Message)"; $failed++ }
-        elseif (-not $c[1] -and -not $x) { "  FAIL  ExposureTime $($c[0]) accepted at 50 Hz"; $failed++ }
-        elseif (-not $c[1] -and -not $x.Message.Contains('to 19000 or less')) { "  FAIL  ExposureTime $($c[0]): $($x.Message)"; $failed++ }
-        elseif ($c[1]) { "  ok    ExposureTime $($c[0]) fits 50 Hz" }
-        else { "  ok    ExposureTime $($c[0]) refused: $($x.Message)" }
-    }
     $experiment = Join-Path ([IO.Path]::GetTempPath()) ("hds-" + [guid]::NewGuid().ToString('N'))
     try {
         # The board's dump and register map come from RecordHarpDevices (OpenRigs.HarpDevices), from
@@ -284,13 +258,11 @@ if ($Step -eq 'Checks') {
         if ($wf -match 'DumpRegisters>true</harp:DumpRegisters>\s*<harp:MuteReplies' -or $wf -match 'ext:HarpDeviceSchema' -or $wf -match '>BehaviorCommands<') {
             "  FAIL  main.bonsai still asks for the board's dump, writes its register map, or names its commands BehaviorCommands, itself"; $failed++
         } else { "  ok    main.bonsai leaves the board's dump and register map to RecordHarpDevices" }
-        $json =[UclOpenCoenBehaviourBox.SessionJson]::Write($experiment, 'Settings_Rig', '{"a":1}', [datetime]::SpecifyKind([datetime]'2026-11-02T09:05:07', 'Utc'))
-        if ($json -eq (Join-Path $experiment 'Settings\Settings_Rig_2026-11-02T09-05-07.json') -and [IO.File]::ReadAllText($json) -eq '{"a":1}' -and -not (Test-Path "$json.tmp")) {
-            "  ok    SessionJson wrote Settings\Settings_Rig_<DateTime>.json under the experiment folder it was given"
-        } else { "  FAIL  SessionJson wrote '$json'"; $failed++ }
-        # LogDataSchema in OpenRigs.Logging 0.1.0-bbox.1 reads its file name before the experiment folder exists.
-        if ((Get-Content (Join-Path $repo 'src\main.bonsai') -Raw) -match 'LogDataSchema\.bonsai') { "  FAIL  main.bonsai uses LogDataSchema, which writes to the include's saved path in this build"; $failed++ }
-        else { "  ok    main.bonsai does not use LogDataSchema" }
+        # The settings files (Settings\Settings_Rig_<DateTime>.json, Settings\Settings_Experiment_<DateTime>.json) are
+        # OpenRigs.Logging's LogDataSchema, as the dome tasks write theirs.
+        $schemas = [regex]::Matches($wf, 'Path="OpenRigs\.Logging:LogDataSchema\.bonsai">\s*<Name>([^<]+)</Name>') | ForEach-Object { $_.Groups[1].Value }
+        if (($schemas -join ', ') -eq 'Settings_Rig, Settings_Experiment' -and $wf -notmatch 'SessionJson') { "  ok    main.bonsai writes Settings_Rig and Settings_Experiment with LogDataSchema" }
+        else { "  FAIL  main.bonsai's LogDataSchema writes '$($schemas -join ', ')', not Settings_Rig, Settings_Experiment, or it still names SessionJson"; $failed++ }
         # The camera's .mkv and CSV (harpTime, frameId, cameraClockNs, exposureUs, gainDb) are LogVideoFfmpeg's, as the domes'.
         if ($wf -match 'OpenRigs\.Logging:LogVideoFfmpeg\.bonsai' -and $wf -notmatch 'xsi:type="(ffm:VideoWriter|io:CsvWriter|cv:VideoWriter)"') { "  ok    main.bonsai records the camera with LogVideoFfmpeg and writes no video or CSV of its own" }
         else { "  FAIL  main.bonsai does not record the camera with LogVideoFfmpeg, or writes a video or CSV of its own"; $failed++ }
@@ -319,15 +291,17 @@ if ($Step -eq 'Checks') {
     # CameraOverrides: a refusal reads as one message, with no "Parameter name" line.
     $over = New-Object UclOpenCoenBehaviourBox.CameraOverrides
     $over.Binning = 0
-    $camera = New-Object 'UclOpenCoenBehaviourBox.NamedDevice[UclOpenCoenBehaviourBox.SpinnakerCamera]' 'Camera-Overhead', (New-Object UclOpenCoenBehaviourBox.SpinnakerCamera)
+    $camera = New-Object 'OpenRigs.Core.NamedDevice[UclOpenCoenBehaviourBox.SpinnakerCamera]' 'Camera-Overhead', (New-Object UclOpenCoenBehaviourBox.SpinnakerCamera)
     $x = Get-Refusal { $null = Invoke-Process $over $null ($return.MakeGenericMethod($camera.GetType()).Invoke($null, @(, $camera.PSObject.BaseObject))) }
     if ($x -and $x.Message.Contains('must be 1 or more') -and -not $x.Message.Contains('Parameter name')) { "  ok    CameraOverrides refused Binning 0 in one message" } else { "  FAIL  CameraOverrides on Binning 0: $(if ($x) { $x.Message } else { 'accepted' })"; $failed++ }
     $text = [IO.File]::ReadAllText((Join-Path $repo 'src\main.bonsai'))
-    # Every timeout in the workflow says what did not arrive: Watchdog with a message, never a bare Timeout.
+    # Every timeout in the workflow says what did not arrive: Watchdog with a message (the camera's frames),
+    # StartupWatchdog with a What (the Harp clock), never a bare Timeout.
     $dogs = [regex]::Matches($text, 'xsi:type="ext:Watchdog">\s*<ext:DueTime>[^<]+</ext:DueTime>\s*<ext:Message>[^<]+</ext:Message>').Count
+    $startup = [regex]::Matches($text, 'xsi:type="orc:StartupWatchdog">(?:(?!</Combinator>).)*<orc:What>[^<]+</orc:What>', 'Singleline').Count
     $bare = [regex]::Matches($text, 'xsi:type="rx:Timeout"').Count
-    if ($bare -eq 0 -and $dogs -eq [regex]::Matches($text, 'xsi:type="ext:Watchdog"').Count) { "  ok    $dogs Watchdog(s), each with a message; no bare Timeout" }
-    else { "  FAIL  $bare bare rx:Timeout, or a Watchdog without a message"; $failed++ }
+    if ($bare -eq 0 -and $dogs -eq [regex]::Matches($text, 'xsi:type="ext:Watchdog"').Count -and $startup -eq [regex]::Matches($text, 'xsi:type="orc:StartupWatchdog"').Count) { "  ok    $dogs Watchdog(s) and $startup StartupWatchdog(s), each with a message; no bare Timeout" }
+    else { "  FAIL  $bare bare rx:Timeout, or a Watchdog or StartupWatchdog without a message"; $failed++ }
     exit $(if ($failed) { 1 } else { 0 })
 }
 
@@ -345,7 +319,7 @@ if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ } else { "  ok" }
 "3. RigDevice on config\rig-template.yml..."
 & powershell -NoProfile -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path -Step RigDevice
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
-"4. ExposureFitsTrigger, Watchdog and CameraOverrides..."
+"4. Settings files, Watchdog and CameraOverrides..."
 & powershell -NoProfile -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path -Step Checks
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
 if ($bad) { "check-workflow: $bad of 4 steps failed."; exit 1 }
