@@ -38,19 +38,6 @@ if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     throw "The 'dotnet' command was not found. Install the .NET SDK: https://dotnet.microsoft.com/download"
 }
 
-# Before regenerate-schemas: it runs bonsai.sgen, which a fresh clone lacks until the tools are restored.
-Write-Output "Restoring dotnet tools..."
-&dotnet tool restore
-Assert-Success "dotnet tool restore"
-
-Write-Output "Regenerating the JSON schema and C# classes from the pydantic models..."
-&uv run --locked regenerate-schemas
-Assert-Success "Regenerating the schemas"
-
-Write-Output "Writing the rig configuration template..."
-&uv run --locked python examples/rig.py
-Assert-Success "Writing the rig configuration template"
-
 # Same name the rig workflow resolves at startup (Environment.MachineName).
 $machineDirectory = Join-Path $ConfigRoot ([Environment]::MachineName)
 Write-Output "Preparing the rig configuration directory $machineDirectory..."
@@ -59,12 +46,10 @@ $rigConfig = Join-Path $machineDirectory "rig.yml"
 if (Test-Path -Path $rigConfig) {
     Write-Output "Keeping the existing $rigConfig"
 } else {
-    # The template's $schema path is relative to config\; point the copy at this checkout instead.
-    $schemaDirectory = (Resolve-Path ".\src\DataSchemas").Path -replace "\\", "/"
-    $text = [IO.File]::ReadAllText((Resolve-Path ".\config\rig-template.yml").Path)
-    $text = $text.Replace('$schema=../src/DataSchemas/', '$schema=' + $schemaDirectory + '/')
-    [IO.File]::WriteAllText($rigConfig, $text)
-    Write-Output "Created $rigConfig from config\rig-template.yml; fill in this rig's values there."
+    # The lab's one template (lib-open-rigs open_rigs\rigs\rig-template.yml, from the open-rigs this repo pins):
+    # delete the devices a box lacks and fill in every CHANGE-ME.
+    Copy-Item (Resolve-Path ".\.venv\Lib\site-packages\open_rigs\rigs\rig-template.yml").Path $rigConfig
+    Write-Output "Created $rigConfig from the lab's rig template; keep the box's devices and fill in this rig's values there."
 }
 
 Write-Output "Creating a Bonsai environment and installing packages..."

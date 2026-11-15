@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <VisualizerLayout Version="2.9.0">
-  <WindowSettings Index="7">
+  <WindowSettings Index="8">
     <Visible>false</Visible>
     <NestedLayout>
-      <WindowSettings Index="1">
+      <WindowSettings Index="8">
         <Visible>false</Visible>
         <NestedLayout>
-          <WindowSettings Index="28">
+          <WindowSettings Index="2">
             <Location>
               <X>100</X>
               <Y>100</Y>
@@ -20,7 +20,7 @@
               <IplImageVisualizer />
             </VisualizerSettings>
           </WindowSettings>
-          <WindowSettings Index="41">
+          <WindowSettings Index="5">
             <Location>
               <X>100</X>
               <Y>700</Y>

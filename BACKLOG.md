@@ -1,5 +1,12 @@
 # Backlog
 
+## 2026-11-15 Rig hardware as device pieces (lib-open-rigs, Pip: "NO BACKWARDS COMPATIBILITY")
+
+- Onto lib-open-rigs' pieces: `ReadLabRig` (the lab rig model `LabRig`) first, `LogLabExperiment` on its own, then `Hardware`: `ReadyGate` (Ready once the board's clock is set and the camera has sent a frame), `BehaviorBoard`, `ClockFromBoard` (the clock write re-sent each heartbeat until it agrees), `RunningWheel`, `SpinnakerCamera` (`Binning` now the camera piece's launch property), `CameraTriggers` (the trigger starts once the camera acquires, not on a timer), `CameraLiveControls` (`CameraExposureUs`, `CameraGainDb`), and the editor's `Preview`. `Logging` keeps the run (`RecordVideo` takes the run length's frames into the manifest and reports Finished), `LogControlEvents`, `RecordHarpDevices` and `ExperimentManifest` (`{RigFiles}`).
+- Deleted: the box's own rig model and generator (`rig.py`, `regenerate.py`, `src\DataSchemas`, `UclOpenCoenBehaviourBox.Generated.cs`, `CameraOverrides.cs`, `examples\rig.py`, `config\rig-template.yml`, `.config\dotnet-tools.json`, the Schemas CI job, `tests\test_rig_template.py`) and its own check-workflow (now lib's, through the short wrapper). `deploy.ps1` starts a new rig's `rig.yml` from lib's one template. Harp.TimestampGeneratorGen3 pinned at 0.1.1 by hand (LabRig's generated C# needs it). `config\main.layout` rebuilt: the preview on `Hardware > Preview` node 2, the readout on node 5. `tests\test_workflow.py` holds the workflow to lib's lint.
+- **Data from this change on:** a `BonsaiData\BonsaiData_Async` file (the controller's events, LogLabExperiment's); the video and its CSV run from the camera's first frame until the workflow stops, not exactly the run length (the manifest's run still completes at the run length's frames); a dropped frame is a jump in `frameId` with the triggers around it kept.
+- Rig test next, BBOX-1 with no mouse (Phase 4): rig.yml drops `camera.overhead.triggerFrequency`, gains `pixelFormat: Mono8` and the wiring line `DO0: { device: CameraTrigger, targets: [Camera-Overhead] }`.
+
 ## 15 Nov 2026: Pip's decisions after the audit cycles
 
 - `deploy.ps1` runs bonsai.sgen once, in `regenerate-schemas` (same `Generated.cs` byte for byte), and drops `git submodule update` (no submodules) and the `calibration\` folder (the box has none). The unused task model (`task.py`, `examples\task.py`), open_rigs' `ExperimentSession` and `pydantic-settings` are gone: the schema and generated C# hold `BehaviourBoxRig` only. `swc-aeon` is pinned to the commit `uv.lock` held (Pip: pinned in all repos), not a branch.
@@ -37,7 +44,7 @@
 
 ## Open
 
-- Move onto lib's LabRig (ReadLabRig), lib's check-workflow wrapper and RigHardware/RunningWheel; then delete lib's BehaviourBoxRig, the generated C# and config/rig-template.yml; test on BBOX-1 before rollout (Pip, 15 Nov 2026)
+- ~~Move onto lib's LabRig~~ Done 15 Nov 2026 (device pieces, above); the BBOX-1 test is open.
 
 ## Check on the rig
 
