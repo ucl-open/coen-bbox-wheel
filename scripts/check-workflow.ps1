@@ -317,7 +317,8 @@ if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
 & powershell -NoProfile -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path -Step Checks
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
 "5. Every file the workflow writes is in ExpectedFiles (open-rigs' workflow_lint)..."
-$lint = 'import sys; from pathlib import Path; from open_rigs.rigs import workflow_lint as lint; p = lint.expected_files_problems(lint.Workflow(Path(sys.argv[1]))); print("\n".join("  FAIL  " + x for x in p) or "  ok"); sys.exit(1 if p else 0)'
+# No double quotes: Windows PowerShell 5.1 mangles them in an argument to a native program.
+$lint = 'import sys; from pathlib import Path; from open_rigs.rigs import workflow_lint as lint; p = lint.expected_files_problems(lint.Workflow(Path(sys.argv[1]))); print(chr(10).join([''  FAIL  '' + x for x in p]) or ''  ok''); sys.exit(1 if p else 0)'
 & uv run --project $repo --locked -q python -I -c $lint $repo
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
 if ($bad) { "check-workflow: $bad of 5 steps failed."; exit 1 }
