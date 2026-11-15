@@ -13,8 +13,8 @@ param(
 #      are found; and every key in it reaches the Settings_Rig JSON the experiment logs.
 #   4. No dump or register map of the workflow's own, the settings files written by
 #      OpenRigs.Logging's LogDataSchema, the camera recorded by LogVideoFfmpeg with no writer of the
-#      workflow's own, Watchdog's own message, and CameraOverrides' refusal without a "Parameter
-#      name" line; in main.bonsai, every timeout is a Watchdog or StartupWatchdog with a message.
+#      workflow's own, and CameraOverrides' refusal without a "Parameter name" line; in main.bonsai,
+#      every timeout is an OpenRigs.Core GapWatchdog or StartupWatchdog with a message.
 # Needs a deployed clone (scripts\deploy.cmd: .bonsai\Packages). Exit 0 when all four pass.
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
@@ -275,19 +275,11 @@ if ($Step -eq 'Checks') {
     $rx = [System.Reactive.Linq.Observable]
     $wait = $rx.GetMethods() | Where-Object { $_.Name -eq 'Wait' -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1
     $return = $rx.GetMethods() | Where-Object { $_.Name -eq 'Return' -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1
-    $never = $rx.GetMethods() | Where-Object { $_.Name -eq 'Never' -and $_.GetParameters().Count -eq 0 } | Select-Object -First 1
-    function Invoke-Process($Operator, [type]$Type, $Source) {
+        function Invoke-Process($Operator, [type]$Type, $Source) {
         $out = $Operator.GetType().GetMethods() | Where-Object { $_.Name -eq 'Process' } | Select-Object -First 1
         if ($out.IsGenericMethodDefinition) { $out = $out.MakeGenericMethod($Type) }
         $wait.MakeGenericMethod($out.ReturnType.GetGenericArguments()[0]).Invoke($null, @(, $out.Invoke($Operator, @(, $Source))))
     }
-    # Watchdog: silent past DueTime -> its own message; a value in time passes.
-    $dog = New-Object UclOpenCoenBehaviourBox.Watchdog
-    $dog.DueTime = [TimeSpan]::FromSeconds(0.2); $dog.Message = 'The board did not confirm its clock.'
-    $x = Get-Refusal { Invoke-Process $dog ([int]) ($never.MakeGenericMethod([int]).Invoke($null, @())) }
-    if ($x -is [TimeoutException] -and $x.Message -eq $dog.Message) { "  ok    Watchdog stopped with its own message" } else { "  FAIL  Watchdog on silence: $(if ($x) { $x.Message } else { 'no error' })"; $failed++ }
-    $x = Get-Refusal { $null = Invoke-Process $dog ([int]) ($return.MakeGenericMethod([int]).Invoke($null, @(, 1))) }
-    if (-not $x) { "  ok    Watchdog passed a value that came in time" } else { "  FAIL  Watchdog refused a value in time: $($x.Message)"; $failed++ }
     # CameraOverrides: a refusal reads as one message, with no "Parameter name" line.
     $over = New-Object UclOpenCoenBehaviourBox.CameraOverrides
     $over.Binning = 0
@@ -295,13 +287,13 @@ if ($Step -eq 'Checks') {
     $x = Get-Refusal { $null = Invoke-Process $over $null ($return.MakeGenericMethod($camera.GetType()).Invoke($null, @(, $camera.PSObject.BaseObject))) }
     if ($x -and $x.Message.Contains('must be 1 or more') -and -not $x.Message.Contains('Parameter name')) { "  ok    CameraOverrides refused Binning 0 in one message" } else { "  FAIL  CameraOverrides on Binning 0: $(if ($x) { $x.Message } else { 'accepted' })"; $failed++ }
     $text = [IO.File]::ReadAllText((Join-Path $repo 'src\main.bonsai'))
-    # Every timeout in the workflow says what did not arrive: Watchdog with a message (the camera's frames),
+    # Every timeout in the workflow says what did not arrive: GapWatchdog with a message (the camera's frames),
     # StartupWatchdog with a What (the Harp clock), never a bare Timeout.
-    $dogs = [regex]::Matches($text, 'xsi:type="ext:Watchdog">\s*<ext:DueTime>[^<]+</ext:DueTime>\s*<ext:Message>[^<]+</ext:Message>').Count
+    $dogs = [regex]::Matches($text, 'xsi:type="orc:GapWatchdog">\s*<orc:GapSeconds>[^<]+</orc:GapSeconds>\s*<orc:Message>[^<]+</orc:Message>').Count
     $startup = [regex]::Matches($text, 'xsi:type="orc:StartupWatchdog">(?:(?!</Combinator>).)*<orc:What>[^<]+</orc:What>', 'Singleline').Count
     $bare = [regex]::Matches($text, 'xsi:type="rx:Timeout"').Count
-    if ($bare -eq 0 -and $dogs -eq [regex]::Matches($text, 'xsi:type="ext:Watchdog"').Count -and $startup -eq [regex]::Matches($text, 'xsi:type="orc:StartupWatchdog"').Count) { "  ok    $dogs Watchdog(s) and $startup StartupWatchdog(s), each with a message; no bare Timeout" }
-    else { "  FAIL  $bare bare rx:Timeout, or a Watchdog or StartupWatchdog without a message"; $failed++ }
+    if ($bare -eq 0 -and $dogs -eq [regex]::Matches($text, 'xsi:type="orc:GapWatchdog"').Count -and $startup -eq [regex]::Matches($text, 'xsi:type="orc:StartupWatchdog"').Count) { "  ok    $dogs GapWatchdog(s) and $startup StartupWatchdog(s), each with a message; no bare Timeout" }
+    else { "  FAIL  $bare bare rx:Timeout, or a GapWatchdog or StartupWatchdog without a message"; $failed++ }
     exit $(if ($failed) { 1 } else { 0 })
 }
 
@@ -319,7 +311,7 @@ if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ } else { "  ok" }
 "3. RigDevice on config\rig-template.yml..."
 & powershell -NoProfile -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path -Step RigDevice
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
-"4. Settings files, Watchdog and CameraOverrides..."
+"4. Settings files, watchdogs and CameraOverrides..."
 & powershell -NoProfile -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path -Step Checks
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
 if ($bad) { "check-workflow: $bad of 4 steps failed."; exit 1 }
