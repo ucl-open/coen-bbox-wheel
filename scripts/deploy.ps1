@@ -44,12 +44,12 @@ Write-Output "Restoring dotnet tools..."
 Assert-Success "dotnet tool restore"
 
 Write-Output "Regenerating JSON schema from pydantic models..."
-&uv run regenerate-schemas
+&uv run --locked regenerate-schemas
 Assert-Success "Regenerating the schemas"
 
 # Derive C# namespace from schema filename (snake_case -> PascalCase).
 $schemaFile = Get-ChildItem ".\src\DataSchemas\*.json" | Select-Object -First 1
-if (-not $schemaFile) { throw "No JSON schema found in .\src\DataSchemas\. Run 'uv run regenerate-schemas' first." }
+if (-not $schemaFile) { throw "No JSON schema found in .\src\DataSchemas\. Run 'uv run --locked regenerate-schemas' first." }
 $namespace = ($schemaFile.BaseName -split "_" | ForEach-Object { $_.Substring(0,1).ToUpper() + $_.Substring(1) }) -join ""
 
 if (-not (Test-Path -Path src\Extensions)) {
@@ -63,7 +63,7 @@ Pop-Location
 Assert-Success "Generating the C# classes"
 
 Write-Output "Writing the rig configuration template..."
-&uv run python examples/rig.py
+&uv run --locked python examples/rig.py
 Assert-Success "Writing the rig configuration template"
 
 # Same name the rig workflow resolves at startup (Environment.MachineName).
@@ -83,6 +83,8 @@ if (Test-Path -Path $rigConfig) {
 }
 
 Write-Output "Creating a Bonsai environment and installing packages..."
+# A missing script is a non-terminating error and leaves $LASTEXITCODE as it was, so check first.
+if (-not (Test-Path -Path .\.bonsai\Setup.ps1)) { throw ".bonsai\Setup.ps1 was not found. The deploy is incomplete." }
 & .\.bonsai\Setup.ps1
 Assert-Success "Installing Bonsai and its packages"
 

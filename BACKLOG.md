@@ -1,5 +1,13 @@
 # Backlog
 
+## Audit round 3 of 3 (15 Nov 2026)
+
+- `scripts\deploy.ps1` exits 1 naming `.bonsai\Setup.ps1` when it is missing (a missing script left the last exit code, 0), and runs `uv run --locked`.
+
+## Audit round 3 of 3 (15 Nov 2026): items not changed
+
+- `.bonsai\Setup.ps1` is the same 15 lines in five task repos (coen-dome-navigation, coen-dome-decision-making, coen-behaviour-box, coen-qc-calibrate-valve, coen-qc-preflight-rig): each repo needs its own bootstrap.
+
 ## Audit round 2 of 3 (15 Nov 2026, stage C)
 
 - Nothing changed beyond the fixes: `scripts\deploy.ps1` uses `uv sync --locked` and runs `.bonsai\Setup.ps1`, checking its exit code; `.bonsai\Bonsai.config` pins Bonsai.Dsp and Bonsai.System 2.9.0 as the other repos do; the README names app-rig-setup's `workflows\update-workflows.ps1` and the `RigHardware.json` path.
