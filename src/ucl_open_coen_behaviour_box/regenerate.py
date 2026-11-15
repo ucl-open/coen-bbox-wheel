@@ -4,9 +4,7 @@ import json
 import pydantic
 import subprocess
 
-from open_rigs.core import ExperimentSession
 import ucl_open_coen_behaviour_box.rig
-import ucl_open_coen_behaviour_box.task
 
 SCHEMA_ROOT = Path("./src/DataSchemas/")
 SCHEMA_FILE = SCHEMA_ROOT / "ucl_open_coen_behaviour_box.json"
@@ -14,9 +12,7 @@ SCHEMA_FILE = SCHEMA_ROOT / "ucl_open_coen_behaviour_box.json"
 
 def main():
     models = [
-        ucl_open_coen_behaviour_box.task.UclOpenCoenBehaviourBoxTaskLogic,
         ucl_open_coen_behaviour_box.rig.BehaviourBoxRig,
-        ExperimentSession
     ]
     model = pydantic.RootModel[Union[tuple(models)]]
     schema = model.model_json_schema(by_alias=True, mode="serialization", union_format="primitive_type_array")

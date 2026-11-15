@@ -1,5 +1,5 @@
 # Whether the committed schema, generated C# and rig template are what the Python makes. The
-# workflow reads rig.yml with the generated classes, so an edit to rig.py, task.py or the lab's
+# workflow reads rig.yml with the generated classes, so an edit to rig.py or the lab's
 # rig schema (lib-open-rigs, open_rigs.rigs) that was not regenerated leaves the workflow
 # refusing keys the Python allows. The fix is to run, from the repo root:
 #   uv run regenerate-schemas

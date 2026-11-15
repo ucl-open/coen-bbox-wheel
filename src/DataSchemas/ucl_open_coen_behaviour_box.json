@@ -522,45 +522,6 @@
       "title": "DigitalOutputs",
       "x-sgen-typename": "Harp.Behavior.DigitalOutputs"
     },
-    "ExperimentSession": {
-      "description": "The base class for creating open-rigs experiment models.",
-      "properties": {
-        "workflow": {
-          "description": "Path to the workflow running the experiment.",
-          "title": "Workflow",
-          "type": "string"
-        },
-        "commit": {
-          "description": "Commit hash of the experiment repo.",
-          "title": "Commit",
-          "type": "string"
-        },
-        "repositoryUrl": {
-          "description": "The URL of the git repository used to version experiment source code.",
-          "title": "RepositoryUrl",
-          "type": "string"
-        },
-        "subjectId": {
-          "description": "The subject id for this session.",
-          "title": "SubjectId",
-          "type": "string"
-        },
-        "sessionId": {
-          "description": "The session identifier.",
-          "title": "SessionId",
-          "type": "string"
-        }
-      },
-      "required": [
-        "workflow",
-        "commit",
-        "repositoryUrl",
-        "subjectId",
-        "sessionId"
-      ],
-      "title": "ExperimentSession",
-      "type": "object"
-    },
     "FixedPulse": {
       "description": "A pulsed output whose width is set in the rig configuration, such as an LED, an air puff or a TTL.",
       "properties": {
@@ -808,38 +769,6 @@
       "title": "SpinnakerCamera",
       "type": "object"
     },
-    "UclOpenCoenBehaviourBoxTaskLogic": {
-      "properties": {
-        "version": {
-          "const": "0.0.0-rc1",
-          "default": "0.0.0-rc1",
-          "title": "Version",
-          "type": "string"
-        },
-        "name": {
-          "const": "UclOpenCoenBehaviourBox",
-          "default": "UclOpenCoenBehaviourBox",
-          "description": "Name of the task logic",
-          "title": "Name",
-          "type": "string"
-        },
-        "taskParameters": {
-          "$ref": "#/$defs/UclOpenCoenBehaviourBoxTaskParameters",
-          "description": "Parameters of the task logic",
-          "title": "TaskParameters"
-        }
-      },
-      "required": [
-        "taskParameters"
-      ],
-      "title": "UclOpenCoenBehaviourBoxTaskLogic",
-      "type": "object"
-    },
-    "UclOpenCoenBehaviourBoxTaskParameters": {
-      "properties": {},
-      "title": "UclOpenCoenBehaviourBoxTaskParameters",
-      "type": "object"
-    },
     "VideoEncoder": {
       "description": "How this machine encodes its cameras' video: OpenRigs.Video's FfmpegVideoWriter (OpenRigs.Logging's LogVideoFfmpeg)\nreads it at Start. The encoder is the machine's, so it is one setting for every camera.",
       "properties": {
@@ -939,16 +868,6 @@
       "type": "object"
     }
   },
-  "anyOf": [
-    {
-      "$ref": "#/$defs/UclOpenCoenBehaviourBoxTaskLogic"
-    },
-    {
-      "$ref": "#/$defs/BehaviourBoxRig"
-    },
-    {
-      "$ref": "#/$defs/ExperimentSession"
-    }
-  ],
-  "title": "RootModel[Union[UclOpenCoenBehaviourBoxTaskLogic, BehaviourBoxRig, ExperimentSession]]"
+  "$ref": "#/$defs/BehaviourBoxRig",
+  "title": "RootModel[BehaviourBoxRig]"
 }
