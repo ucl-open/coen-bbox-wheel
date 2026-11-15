@@ -1,5 +1,10 @@
 # Backlog
 
+## Audit cycle 2 (15 Nov 2026)
+
+- `scripts\deploy.ps1` stops with exit 1 on a failed cmdlet or .NET call (`$ErrorActionPreference = 'Stop'`): a rig.yml it could not write, or a layout it could not copy, printed the error and exited 0. The Quick Sync probe stays a warning. `scripts\check-workflow.ps1`'s C# build takes stderr without dying on it (Windows PowerShell makes a merged stderr line fatal under 'Stop').
+- Checked headless with rig.yml variants (port COM97, no Go): trigger0Frequency 0, no `cameraTriggerController`, exposure 25,000 and an unknown key each stop at Start naming the problem; a missing `portName` says "Value cannot be null. Parameter name: PortName"; an empty rig.yml says only "Object reference not set to an instance of an object."; a missing `rootPath` reaches ready mode.
+
 ## Audit cycle 1 (15 Nov 2026)
 
 - Names and docs brought up to date: app-rig-control, app-rig-setup and its `update-workflows.ps1`, the Hardware page and `RigHardware.json`'s `boards`, the template's `codec: h264_qsv`, `ConfigRoot` reaching four nodes, the second camera's `EnableTrigger1`, the RunningWheel and Camera descriptions; `RecordVideo`'s unused `SampleInterval` (no window, no reader) removed; the broken `examples\session.py` (`Experiment` never imported) deleted; the schema check no longer runs sgen twice now `regenerate.py` checks its run.

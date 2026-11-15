@@ -304,8 +304,12 @@ if (-not (Test-Path (Join-Path $bonsaiDir 'Packages'))) { throw "No .bonsai\Pack
 $bad = 0
 "1. Compiling src\Extensions as C# 5..."
 Remove-Item $bin -Recurse -Force -ErrorAction SilentlyContinue
+# 'Continue' for this call: under 'Stop', Windows PowerShell makes any stderr line from dotnet, merged by
+# 2>&1, a terminating NativeCommandError, failing the check with no build error shown.
+$ErrorActionPreference = 'Continue'
 $log = & dotnet build (Join-Path $repo 'src\Extensions.csproj') -o $bin -nologo -v q `
     --source https://api.nuget.org/v3/index.json --source (Join-Path $repo 'local_packages') 2>&1
+$ErrorActionPreference = 'Stop'
 if ($LASTEXITCODE -ne 0) { $log | Where-Object { "$_" -match 'error' } | Select-Object -Unique | ForEach-Object { "  $_" }; "  FAILED"; exit 1 }
 "  ok"
 "2. Building src\main.bonsai with Bonsai's builders..."

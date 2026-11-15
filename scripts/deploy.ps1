@@ -6,6 +6,10 @@ param(
     [string]$ConfigRoot = "C:\Coen-Lab-Local\RigConfigs"
 )
 
+# A failed cmdlet or .NET call (rig.yml or the layout not written) stops the deploy with exit 1;
+# without this it printed the error and went on to exit 0.
+$ErrorActionPreference = 'Stop'
+
 $scriptPath = $MyInvocation.MyCommand.Path
 $scriptDirectory = Split-Path -Parent $scriptPath
 Set-Location (Split-Path -Parent $scriptDirectory)
@@ -108,7 +112,11 @@ $ffmpeg = Get-Command ffmpeg -ErrorAction SilentlyContinue
 if (-not $ffmpeg) {
     Write-Warning "FFmpeg was not found on PATH. Install it with: winget install --id Gyan.FFmpeg -e, then open a new window."
 } else {
+    # Windows PowerShell turns a redirected native stderr line into an error, which 'Stop' would
+    # make fatal: a machine without Quick Sync is only warned.
+    $ErrorActionPreference = 'Continue'
     & $ffmpeg.Source -v error -f lavfi -i color=black:s=320x240 -frames:v 1 -c:v h264_qsv -f null - 2>$null
+    $ErrorActionPreference = 'Stop'
     if ($LASTEXITCODE -eq 0) {
         Write-Output "FFmpeg found, Intel Quick Sync encoding works."
     } else {
