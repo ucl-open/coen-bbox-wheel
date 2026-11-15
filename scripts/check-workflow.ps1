@@ -15,7 +15,9 @@ param(
 #      OpenRigs.Logging's LogDataSchema, the camera recorded by LogVideoFfmpeg with no writer of the
 #      workflow's own, and CameraOverrides' refusal without a "Parameter name" line; in main.bonsai,
 #      every timeout is an OpenRigs.Core GapWatchdog or StartupWatchdog with a message.
-# Needs a deployed clone (scripts\deploy.cmd: .bonsai\Packages). Exit 0 when all four pass.
+#   5. Every file the workflow writes is named in ExperimentManifest's ExpectedFiles, with its condition
+#      (open-rigs' workflow_lint.expected_files_problems, as the domes' tests run it).
+# Needs a deployed clone (scripts\deploy.cmd: .bonsai\Packages). Exit 0 when all five pass.
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $bin = Join-Path ([IO.Path]::GetTempPath()) 'coen-behaviour-box-check'
@@ -314,5 +316,9 @@ if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
 "4. Settings files, watchdogs and CameraOverrides..."
 & powershell -NoProfile -ExecutionPolicy Bypass -File $MyInvocation.MyCommand.Path -Step Checks
 if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
-if ($bad) { "check-workflow: $bad of 4 steps failed."; exit 1 }
-"check-workflow: all 4 steps passed."
+"5. Every file the workflow writes is in ExpectedFiles (open-rigs' workflow_lint)..."
+$lint = 'import sys; from pathlib import Path; from open_rigs.rigs import workflow_lint as lint; p = lint.expected_files_problems(lint.Workflow(Path(sys.argv[1]))); print("\n".join("  FAIL  " + x for x in p) or "  ok"); sys.exit(1 if p else 0)'
+& uv run --project $repo --locked -q python -I -c $lint $repo
+if ($LASTEXITCODE -ne 0) { "  FAILED"; $bad++ }
+if ($bad) { "check-workflow: $bad of 5 steps failed."; exit 1 }
+"check-workflow: all 5 steps passed."
