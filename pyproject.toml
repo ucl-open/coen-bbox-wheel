@@ -21,11 +21,6 @@ dependencies = [
   "pydantic-settings"
 ]
 
-# [project.urls]
-# Documentation = "https://open-rigs.github.io/Ucl.Open.CoenBehaviourBox/"
-# Repository = "https://github.com/OpenRigs/Ucl.Open.CoenBehaviourBox/"
-# Issues = "https://github.com/OpenRigs/Ucl.Open.CoenBehaviourBox/issues"
-# Changelog = "https://github.com/OpenRigs/Ucl.Open.CoenBehaviourBox/releases"
 [project.scripts]
 regenerate-schemas = "ucl_open_coen_behaviour_box.regenerate:main"
 

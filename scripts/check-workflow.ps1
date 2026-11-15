@@ -276,7 +276,7 @@ if ($Step -eq 'Checks') {
     $rx = [System.Reactive.Linq.Observable]
     $wait = $rx.GetMethods() | Where-Object { $_.Name -eq 'Wait' -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1
     $return = $rx.GetMethods() | Where-Object { $_.Name -eq 'Return' -and $_.GetParameters().Count -eq 1 } | Select-Object -First 1
-        function Invoke-Process($Operator, [type]$Type, $Source) {
+    function Invoke-Process($Operator, [type]$Type, $Source) {
         $out = $Operator.GetType().GetMethods() | Where-Object { $_.Name -eq 'Process' } | Select-Object -First 1
         if ($out.IsGenericMethodDefinition) { $out = $out.MakeGenericMethod($Type) }
         $wait.MakeGenericMethod($out.ReturnType.GetGenericArguments()[0]).Invoke($null, @(, $out.Invoke($Operator, @(, $Source))))

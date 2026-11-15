@@ -277,14 +277,8 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="rx:Merge" />
                         </Expression>
-                        <Expression xsi:type="ExternalizedMapping">
-                          <Property Name="Name" DisplayName="CommandsSubjectName" Description="The name of the Subject that carries command messages for a specific behavior device" Category="Subjects" />
-                        </Expression>
                         <Expression xsi:type="MulticastSubject">
                           <Name>BehaviorBoard-Main.Commands</Name>
-                        </Expression>
-                        <Expression xsi:type="ExternalizedMapping">
-                          <Property Name="Name" DisplayName="EventsSubjectName" Description="The name of the Subject that carries event messages from a specific behavior device" Category="Subjects" />
                         </Expression>
                         <Expression xsi:type="SubscribeSubject">
                           <Name>BehaviorBoard-Main.Data</Name>
@@ -297,11 +291,9 @@
                         <Edge From="0" To="3" Label="Source1" />
                         <Edge From="1" To="3" Label="Source2" />
                         <Edge From="2" To="3" Label="Source3" />
-                        <Edge From="3" To="5" Label="Source1" />
-                        <Edge From="4" To="5" Label="Source2" />
-                        <Edge From="5" To="8" Label="Source1" />
-                        <Edge From="6" To="7" Label="Source1" />
-                        <Edge From="7" To="8" Label="Source2" />
+                        <Edge From="3" To="4" Label="Source1" />
+                        <Edge From="4" To="6" Label="Source1" />
+                        <Edge From="5" To="6" Label="Source2" />
                       </Edges>
                     </Workflow>
                   </Expression>

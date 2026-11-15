@@ -2,8 +2,7 @@
 from typing import Literal
 from pydantic import Field
 
-from swc.aeon.io import reader
-from swc.aeon.schema import BaseSchema, data_reader
+from swc.aeon.schema import BaseSchema
 
 from ucl_open_coen_behaviour_box import __semver__
 
