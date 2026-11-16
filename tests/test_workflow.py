@@ -137,3 +137,9 @@ def test_settings_task_is_the_task_file_as_json_after_the_experiment_folder_exis
     assert len(logs) == 1
     assert "task:SerializeToJson" in TEXT and "Settings/Settings_Task_" in TEXT
     assert lint.output_ends_logs_problems(WORKFLOW.root) == []
+
+def test_the_camera_s_parameters_are_named_from_its_piece():
+    # CameraLiveControls declares Camera-Overhead.ExposureUs and .GainDb; the descriptions said the names of 9 to 16 Nov
+    # 2026 (audit QF7).
+    assert "CameraExposureUs" not in TEXT and "CameraGainDb" not in TEXT
+    assert "Camera-Overhead.ExposureUs" in TEXT and "Camera-Overhead.GainDb" in TEXT
