@@ -24,3 +24,8 @@ What is still to do, then what has been decided and why. Closed work, audit roun
 - Licensed BSD 3-Clause, as lib-open-rigs.
 - The camera records Mono8 through `LogVideoFfmpeg`.
 - The rig's local `rig.yml` is the master; app-rig-setup copies it one way up to the share.
+
+## Audit round 3 (16 Nov 2026): not recommended
+
+- Box run length not moved back to a controller parameter: the task file is the one place.
+- Box task-file layout not made to mirror the domes: lib `TaskLogs` needs `TrialRow` and the box has no trials; `ReadTextFile` and `ReadAllText` differ on purpose.
