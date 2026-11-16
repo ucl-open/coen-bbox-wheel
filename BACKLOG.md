@@ -4,7 +4,6 @@ What is still to do, then what has been decided and why. Closed work, audit roun
 
 ## Open
 
-- A task file and `LaunchSettings`, as the dome tasks have, in place of the hand-built `RunSettings` (Pip, 16 Nov 2026): waits for Pip, as the box's one task setting, `RunLengthMinutes`, is a controller parameter recorded in `Settings_Experiment`, and a task file would move it into a new `Settings_Task`.
 - Check on the rig (GEEK-BBOX1):
   - Quick Sync and `LogVideoFfmpeg` (`h264_qsv`): checked offline only. Run 30 minutes: 90,000 frames == 90,000 CSV rows, CPU, no dropped-frame warning.
   - Manifest outcomes seen: `completed`, `stopped`, `ended-early`. Still to see: `error` (a pulled trigger cable) and the overnight copy of a real experiment.
@@ -19,7 +18,9 @@ What is still to do, then what has been decided and why. Closed work, audit roun
 ## Decided
 
 - The hardware is lib's rig list `BehaviorBoxHardware` (16 Nov 2026); no device opened by hand.
-- The records are lib's `ExperimentRecords`, as the dome tasks' (16 Nov 2026), with the same files, columns and `ExpectedFiles` as the hand-built `Logging` group (writers compared with lib's includes expanded, and a test). The manifest has no run input, as the domes': `completed` comes from `Run`'s Finished and `run.items` is null.
+- The records are lib's `ExperimentRecords`, as the dome tasks' (16 Nov 2026), with the same files, columns and `ExpectedFiles` as the hand-built `Logging` group (writers compared with lib's includes expanded, and a test). The manifest has no run input, as the domes': `completed` comes from `TaskLogic`'s Finished and `run.items` is null.
+- No task file and no `LaunchSettings` (16 Nov 2026): the box's one task setting, `RunLengthMinutes`, is a controller parameter recorded in `Settings_Experiment`; the workflow keeps its own `RunSettings`.
+- The run is the `TaskLogic` group, as the dome tasks name theirs.
 - Licensed BSD 3-Clause, as lib-open-rigs.
 - The camera records Mono8 through `LogVideoFfmpeg`.
 - The rig's local `rig.yml` is the master; app-rig-setup copies it one way up to the share.

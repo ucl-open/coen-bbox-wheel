@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "ucl-open-coen-behaviour-box"
-description = "A library that defines an open-rigs data schema for the coen-behaviour-box experiment."
+description = "The coen-behaviour-box workflow's environment and its checks against the lab's open-rigs rules."
 authors = [ {name = "Pip Coen", email = "pipcoen@gmail.com"}]
 license = "BSD-3-Clause"
 requires-python = ">=3.11, <3.12"
@@ -16,7 +16,6 @@ version = "0.0.0-rc1"
 readme = {file = "README.md", content-type = "text/markdown"}
 
 dependencies = [
-  "swc-aeon>=0.2.0",
   "open-rigs",
 ]
 
@@ -39,7 +38,6 @@ required-version = '>=0.8.4'
 
 [tool.uv.sources]
 open-rigs = {git = "https://github.com/Coen-Lab/lib-open-rigs", rev = "25aa824c45f44786717a14f2df0745687c11aaca"}
-swc-aeon = { git = "https://github.com/SainsburyWellcomeCentre/aeon_api.git", rev = "7cd561d382011b9fbdcafe827cd92a2804b6799f" }
 
 [dependency-groups]
 dev = [

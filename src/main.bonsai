@@ -2,14 +2,8 @@
 <WorkflowBuilder Version="2.9.0"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
-                 xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
                  xmlns:dev="clr-namespace:OpenRigs.Devices;assembly=OpenRigs.Devices"
-                 xmlns:beh="clr-namespace:Harp.Behavior;assembly=Harp.Behavior"
                  xmlns:scr="clr-namespace:Bonsai.Scripting.Expressions;assembly=Bonsai.Scripting.Expressions"
-                 xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
-                 xmlns:orc="clr-namespace:OpenRigs.Core;assembly=OpenRigs.Core"
-                 xmlns:orv="clr-namespace:OpenRigs.Video;assembly=OpenRigs.Video"
-                 xmlns:ext="clr-namespace:UclOpenCoenBehaviourBox;assembly=Extensions"
                  xmlns:orcl="clr-namespace:OpenRigs.Control;assembly=OpenRigs.Control"
                  xmlns:lv="clr-namespace:OpenRigs.LiveView;assembly=OpenRigs.LiveView"
                  xmlns="https://bonsai-rx.org/2018/workflow">
@@ -186,7 +180,7 @@
         </Workflow>
       </Expression>
       <Expression xsi:type="GroupWorkflow">
-        <Name>Run</Name>
+        <Name>TaskLogic</Name>
         <Description>The run: once the experiment folder exists (PathPrefix, which LogLabExperiment makes at Go), RecordVideo counts the run length's frames from Camera-Overhead.Data and completes, and the run reports Finished, which ExperimentManifest records as completed. The board and camera log themselves; ExperimentRecords records the rest.</Description>
         <Workflow>
           <Nodes>
@@ -203,11 +197,14 @@
                   </Expression>
                   <Expression xsi:type="GroupWorkflow">
                     <Name>RunLengthToFrames</Name>
-                    <Description>Frames to record: run length (minutes) x 60 x the camera trigger frequency of BehaviorBoard-Main in rig.yml.</Description>
+                    <Description>Frames to record: run length (minutes) x 60 x the frequency of the trigger that drives Camera-Overhead, the one whose wiring line in rig.yml names it (OpenRigs.Devices CameraTrigger, as the camera piece finds it).</Description>
                     <Workflow>
                       <Nodes>
                         <Expression xsi:type="SubscribeSubject">
                           <Name>RunSettings</Name>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>Camera-Overhead</Name>
                         </Expression>
                         <Expression xsi:type="SubscribeSubject">
                           <Name>BehaviorBoard-Main</Name>
@@ -215,17 +212,28 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="rx:Zip" />
                         </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="dev:CameraTrigger">
+                            <dev:MarginMicroseconds>1000</dev:MarginMicroseconds>
+                          </Combinator>
+                        </Expression>
+                        <Expression xsi:type="Combinator">
+                          <Combinator xsi:type="rx:Zip" />
+                        </Expression>
                         <Expression xsi:type="scr:ExpressionTransform">
                           <scr:Name>RunLengthToFrames</scr:Name>
-                          <scr:Expression>Convert.ToInt32(Convert.ToDouble(Item1.Item3) * 60.0 * Item2.Settings.CameraTriggerController.Trigger0Frequency)</scr:Expression>
+                          <scr:Expression>Convert.ToInt32(Convert.ToDouble(Item1.Item3) * 60.0 * Item2.Frequency)</scr:Expression>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
                       </Nodes>
                       <Edges>
-                        <Edge From="0" To="2" Label="Source1" />
-                        <Edge From="1" To="2" Label="Source2" />
-                        <Edge From="2" To="3" Label="Source1" />
+                        <Edge From="1" To="3" Label="Source1" />
+                        <Edge From="2" To="3" Label="Source2" />
                         <Edge From="3" To="4" Label="Source1" />
+                        <Edge From="0" To="5" Label="Source1" />
+                        <Edge From="4" To="5" Label="Source2" />
+                        <Edge From="5" To="6" Label="Source1" />
+                        <Edge From="6" To="7" Label="Source1" />
                       </Edges>
                     </Workflow>
                   </Expression>
