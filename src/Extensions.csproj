@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- No sources: the box has no C# of its own. Kept because lib-open-rigs' check-workflow.ps1 builds it and loads its
-       Extensions.dll, YamlDotNet.dll and Newtonsoft.Json.dll from the build output. -->
+  <!-- The task model's generated classes (Extensions\UclOpenCoenBehaviourBoxTask.Generated.cs, from `uv run regenerate-schemas`), and no
+       other C#. lib-open-rigs' check-workflow.ps1 builds it and loads its Extensions.dll, YamlDotNet.dll and Newtonsoft.Json.dll from the build output. -->
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <!-- Bonsai compiles src\Extensions itself with the .NET Framework's csc, which is C# 5. -->
@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bonsai.Core" Version="2.9.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>

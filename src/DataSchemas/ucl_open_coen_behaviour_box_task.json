@@ -1,0 +1,48 @@
+{
+  "$defs": {
+    "UclOpenCoenBehaviourBoxTaskLogic": {
+      "description": "Top-level task logic schema.",
+      "properties": {
+        "taskParameters": {
+          "$ref": "#/$defs/UclOpenCoenBehaviourBoxTaskParameters",
+          "title": "TaskParameters"
+        },
+        "version": {
+          "const": "0.0.0-rc1",
+          "default": "0.0.0-rc1",
+          "title": "Version",
+          "type": "string"
+        },
+        "name": {
+          "const": "UclOpenCoenBehaviourBox",
+          "default": "UclOpenCoenBehaviourBox",
+          "description": "Name of the task",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "taskParameters"
+      ],
+      "title": "UclOpenCoenBehaviourBoxTaskLogic",
+      "type": "object"
+    },
+    "UclOpenCoenBehaviourBoxTaskParameters": {
+      "description": "Task params.",
+      "properties": {
+        "runLengthMinutes": {
+          "default": 30,
+          "description": "How long to record, in whole minutes (1 to 9999): the run takes this many minutes of camera frames from the experiment folder's creation, just after Go, and then ends",
+          "maximum": 9999,
+          "minimum": 1,
+          "title": "RunLengthMinutes",
+          "type": "integer"
+        }
+      },
+      "title": "UclOpenCoenBehaviourBoxTaskParameters",
+      "type": "object"
+    }
+  },
+  "$ref": "#/$defs/UclOpenCoenBehaviourBoxTaskLogic",
+  "title": "RootModel[UclOpenCoenBehaviourBoxTaskLogic]"
+}

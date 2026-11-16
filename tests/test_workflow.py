@@ -58,7 +58,7 @@ def test_the_records_are_experiment_records_and_write_what_the_logging_group_wro
     records = next(n for n in lint.ET.fromstring(TEXT.encode("utf-8")).iter(lint.W + "Expression") if n.get("Path") == lint.EXPERIMENT_RECORDS)
     props = {c.tag.split("}")[-1]: (c.text or "") for c in records if c.tag != lint.W + "Description"}
     assert props == {"ConfigRoot": r"C:\Coen-Lab-Local\RigConfigs", "IngestScript": "coen-behaviour-box", "TrialColumns": "",
-                     "ExpectedFiles": "auto;harp;Settings/Settings_Rig_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_"}
+                     "ExpectedFiles": "auto;harp;Settings/Settings_Rig_;Settings/Settings_Task_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_"}
     assert "<Name>RewardRequests</Name>" not in TEXT and lint.DELIVER_REWARD not in TEXT and lint.TASK_LOGS not in TEXT
     assert TEXT.count("orcl:ReportPhase") == 1 and "<orcl:Phase>Finished</orcl:Phase>" in TEXT
 
@@ -68,11 +68,10 @@ def test_the_layout_is_tracked():
 
 
 def test_the_launch_properties():
-    # The box has no task file (RunLengthMinutes is a controller parameter): its launch properties are the IDs, the
-    # camera piece's Binning and the lab's ConfigRoot.
+    # The launch's IDs, the task file's path, the camera piece's Binning and the lab's ConfigRoot.
     top = lint.child(MAIN, lint.W + "Workflow").find(lint.W + "Nodes")
     exposed = {p.get("Name") for e in top if e.get(lint.XSI) == "ExternalizedMapping" for p in e}
-    assert exposed == {"SubjectId", "SessionId", "LaunchId", "Binning", "ConfigRoot"}
+    assert exposed == {"SubjectId", "SessionId", "LaunchId", "TaskPath", "Binning", "ConfigRoot"}
 
 
 def test_the_launch_id_reaches_the_controller():
@@ -103,3 +102,38 @@ def test_the_run_length_s_frames_are_at_the_camera_s_own_trigger_frequency():
     fed = {label: nodes[a].findtext(lint.W + "Name") for a, b, label in edges if b == zip_}
     assert fed == {"Source1": "Camera-Overhead", "Source2": "BehaviorBoard-Main"}
     assert "* 60.0 * Item2.Frequency)" in ET.tostring(group, encoding="unicode")
+
+def _xml(element) -> str:
+    return re.sub(r"ns\d+:", "", ET.tostring(element, encoding="unicode"))
+
+
+def test_the_launch_settings_are_lib_s_with_the_box_s_task_file():
+    # Pip, 16 Nov 2026: the run length is the task file's, read through lib's LaunchSettings (TaskPath), as the domes'.
+    assert lint.launch_settings_problems(WORKFLOW) == []
+    node = next(n for n in MAIN.iter(lint.W + "Expression") if n.get("Path") == lint.LAUNCH_SETTINGS)
+    assert node.findtext(lint.W + "TaskPath") == "..\\config\\task-box.yml"
+
+
+def test_the_run_length_is_the_task_file_s_and_no_controller_parameter():
+    assert "RunLengthMinutes" not in re.sub(r"<Description>.*?</Description>", "", TEXT, flags=re.S).replace("TaskParameters.RunLengthMinutes", "")
+    assert "orcl:ParameterValue" not in TEXT and not re.search(r"<Parameter>\s*<Name>RunLength", TEXT)
+    assert "<Name>RunSettings</Name>" not in TEXT  # LaunchSettings publishes it
+    group = next(e for e in MAIN.iter(lint.W + "Expression") if e.findtext(lint.W + "Name") == "RunLengthToFrames")
+    text = _xml(group)
+    assert "<Name>TaskConfig</Name>" in text and "Item1.TaskParameters.RunLengthMinutes * 60.0" in text
+
+
+def test_the_task_file_is_read_at_go_into_task_config():
+    # ExperimentGo zipped with TaskFilePath (the path is known from Start, the read waits for Go), deserialized as the generated model.
+    group = next(e for e in MAIN.iter(lint.W + "Expression") if e.findtext(lint.W + "Name") == "TaskFile")
+    text = _xml(group)
+    for part in ("<Name>ExperimentGo</Name>", "<Name>TaskFilePath</Name>", "core:ReadTextFile", "UclOpenCoenBehaviourBoxTaskLogic", "<Name>TaskConfig</Name>"):
+        assert part in text
+    assert TEXT.count("<Name>TaskConfig</Name>") == 3  # published once, read by the run length and by Settings_Task
+
+
+def test_settings_task_is_the_task_file_as_json_after_the_experiment_folder_exists():
+    logs = [e for e in MAIN.iter(lint.W + "Expression") if e.get("Path") == "OpenRigs.Logging:LogDataSchema.bonsai" and e.findtext(lint.W + "Name") == "Settings_Task"]
+    assert len(logs) == 1
+    assert "task:SerializeToJson" in TEXT and "Settings/Settings_Task_" in TEXT
+    assert lint.output_ends_logs_problems(WORKFLOW.root) == []

@@ -19,6 +19,9 @@ dependencies = [
   "open-rigs",
 ]
 
+[project.scripts]
+regenerate-schemas = "ucl_open_coen_behaviour_box.regenerate:main"
+
 [tool.ruff]
 line-length = 120
 target-version = 'py311'
@@ -41,5 +44,7 @@ open-rigs = {git = "https://github.com/Coen-Lab/lib-open-rigs", rev = "cf1344ba3
 
 [dependency-groups]
 dev = [
+    "jsonschema>=4.26.0",
     "pytest>=9.2.0",
+    "pyyaml>=6.0.3",
 ]

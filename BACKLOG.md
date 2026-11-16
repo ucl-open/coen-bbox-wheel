@@ -19,7 +19,7 @@ What is still to do, then what has been decided and why. Closed work, audit roun
 
 - The hardware is lib's rig list `BehaviorBoxHardware` (16 Nov 2026); no device opened by hand.
 - The records are lib's `ExperimentRecords`, as the dome tasks' (16 Nov 2026), with the same files, columns and `ExpectedFiles` as the hand-built `Logging` group (writers compared with lib's includes expanded, and a test). The manifest has no run input, as the domes': `completed` comes from `TaskLogic`'s Finished and `run.items` is null.
-- No task file and no `LaunchSettings` (16 Nov 2026): the box's one task setting, `RunLengthMinutes`, is a controller parameter recorded in `Settings_Experiment`; the workflow keeps its own `RunSettings`.
+- The run length is a task file, `config\task-box.yml` (16 Nov 2026, Pip), as the domes keep their task settings: `taskParameters.runLengthMinutes`, read through lib's `LaunchSettings` (`TaskPath`) at Go and logged as `Settings_Task`. It is no longer a controller parameter or a `Settings_Experiment` entry; the workflow has no `RunSettings` of its own.
 - The run is the `TaskLogic` group, as the dome tasks name theirs.
 - Licensed BSD 3-Clause, as lib-open-rigs.
 - The camera records Mono8 through `LogVideoFfmpeg`.
