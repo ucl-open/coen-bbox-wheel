@@ -29,7 +29,7 @@ def test_no_trial_graph_closes_a_shared_subject():
 
 
 def test_the_workflow_declares_every_command_it_handles():
-    assert lint.undeclared_commands(WORKFLOW) == []
+    assert lint.undeclared_commands(WORKFLOW) == [] and lint.declared_twice(WORKFLOW) == []
 
 
 def test_no_spout_step_size_and_no_background_noise():

@@ -1,5 +1,9 @@
 # Backlog
 
+## 2026-11-16 Pieces declare their own commands and parameters (lib-open-rigs def14f6; Control .13, Devices .27)
+
+- Nothing to drop here (no piece's declaration on ExperimentControl); `tests\test_workflow.py` adds `declared_twice`. `CameraExposureUs` and `CameraGainDb` stay on ExperimentControl: `CameraLiveControls` takes its parameters by the names the task gives it.
+
 ## 2026-11-16 lib-open-rigs 5ea5729 (Audio .11, Control .12, Core .19, Devices .22, Logging .15, Manifest .23, Video .17)
 
 - The new lint finds nothing here: no PropertyMapping shares its source (`shared_mapping_problems`, in `hardware_problems`); no lick spout stage, so no `SpoutStepSize`; no speakers, so no `BackgroundNoise`. `tests\test_workflow.py` calls `spout_step_size_problems` and `background_noise_problems`.
