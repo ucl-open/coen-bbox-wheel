@@ -1,5 +1,9 @@
 # Backlog
 
+## 2026-11-16 The box's hardware is the rig list BBoxHardware (lib-open-rigs 9845e12, Devices .30)
+
+- `Hardware` includes lib-open-rigs' `BBoxHardware` (ReadyGate, BehaviorBoard-Main with ClockFromBoard and RunningWheel, Camera-Overhead on CameraTriggers, `Binning` mapped onto it) in place of those six pieces, so the box's preflight (ucl-open/coen-qc-preflight-rig `src\box.bonsai`) opens the same devices under the same names (Pip, 16 Nov 2026, preflight per rig kind). `CameraLiveControls` and `Preview` stay here; `config\main.layout`'s Preview window moves from node 8 to 3 of `Hardware`. Checked: pytest (the test holds `Hardware` to the rig list) and `scripts\check-workflow.ps1`.
+
 ## 2026-11-16 CameraLiveControls declares its own parameters (lib-open-rigs, Devices .29)
 
 - `CameraExposureUs` and `CameraGainDb` are no longer declared on ExperimentControl, and the `CameraLiveControls` node drops its `ExposureParameter` and `GainParameter`: the piece declares both under those names (`DeclareControls`), shown at rig.yml's values with exposure capped at the trigger period less 1 ms, as before. `tests\test_workflow.py` holds the task to neither. app-rig-control's view `views\coen-behaviour-box.toml` names the same two parameters, so it is unchanged.

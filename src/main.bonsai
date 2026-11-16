@@ -129,43 +129,13 @@
       <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:LogLabExperiment.bonsai" />
       <Expression xsi:type="GroupWorkflow">
         <Name>Hardware</Name>
-        <Description>The box's devices as lib-open-rigs pieces, each from its own entry in rig.yml (ReadLabRig's RigConfigs) and logging itself once the experiment folder exists: ReadyGate (Ready once the board's clock is set and the camera has sent a frame: ReadyWaitsFor), the Behavior board BehaviorBoard-Main, its clock (ClockFromBoard: the board's Harp clock set to UTC, re-sent each heartbeat until it agrees), the running wheel on encoder port 2 (WheelDistanceCm), the camera Camera-Overhead (Binning, a launch property, in place of rig.yml's while set) on the board's camera trigger (CameraTriggers: started once the camera acquires), CameraExposureUs and CameraGainDb taken live by the camera (CameraLiveControls), and the editor's preview (Preview).</Description>
+        <Description>The box's devices: the behaviour boxes' rig list (OpenRigs.Devices BBoxHardware: ReadyGate, Ready once the board's clock is set and the camera has sent a frame; the Behavior board BehaviorBoard-Main with its own clock and the running wheel on encoder port 2, WheelDistanceCm; the camera Camera-Overhead on the board's camera trigger, Binning, a launch property, in place of rig.yml's while set), each piece from its own entry in rig.yml and logging itself once the experiment folder exists; CameraExposureUs and CameraGainDb taken live by the camera (CameraLiveControls), and the editor's preview (Preview).</Description>
         <Workflow>
           <Nodes>
             <Expression xsi:type="ExternalizedMapping">
               <Property Name="Binning" />
             </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:ReadyGate.bonsai">
-              <ReadyWaitsFor>HarpClockSet, Camera-Overhead</ReadyWaitsFor>
-            </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BehaviorBoard.BehaviorBoard.bonsai">
-              <Name>BehaviorBoard-Main</Name>
-              <CommandsSubjectName>BehaviorBoard-Main.Commands</CommandsSubjectName>
-              <DataSubjectName>BehaviorBoard-Main.Data</DataSubjectName>
-            </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BehaviorBoard.ClockFromBoard.bonsai">
-              <Board>BehaviorBoard-Main</Board>
-              <BoardDataSubjectName>BehaviorBoard-Main.Data</BoardDataSubjectName>
-              <BoardCommandsSubjectName>BehaviorBoard-Main.Commands</BoardCommandsSubjectName>
-            </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BehaviorBoard.RunningWheel.bonsai">
-              <Board>BehaviorBoard-Main</Board>
-              <BoardCommandsSubjectName>BehaviorBoard-Main.Commands</BoardCommandsSubjectName>
-              <BoardDataSubjectName>BehaviorBoard-Main.Data</BoardDataSubjectName>
-              <WheelDistanceSubjectName>WheelDistanceCm</WheelDistanceSubjectName>
-            </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:SpinnakerCamera.bonsai">
-              <Name>Camera-Overhead</Name>
-              <Board>BehaviorBoard-Main</Board>
-              <BoardDataSubjectName>BehaviorBoard-Main.Data</BoardDataSubjectName>
-              <DataSubjectName>Camera-Overhead.Data</DataSubjectName>
-            </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:CameraTriggers.bonsai">
-              <Board>BehaviorBoard-Main</Board>
-              <BoardCommandsSubjectName>BehaviorBoard-Main.Commands</BoardCommandsSubjectName>
-              <BoardDataSubjectName>BehaviorBoard-Main.Data</BoardDataSubjectName>
-              <CamerasExpected>Camera-Overhead</CamerasExpected>
-            </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BBoxHardware.bonsai" />
             <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:CameraLiveControls.bonsai">
               <Camera>Camera-Overhead</Camera>
               <Board>BehaviorBoard-Main</Board>
@@ -210,7 +180,7 @@
             </Expression>
           </Nodes>
           <Edges>
-            <Edge From="0" To="5" Label="Source1" />
+            <Edge From="0" To="1" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
