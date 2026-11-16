@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <WorkflowBuilder Version="2.9.0"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
@@ -291,13 +291,13 @@
       </Expression>
       <Expression xsi:type="lv:StreamDevices">
         <Name>LiveView</Name>
-        <Description>Streams every device in this machine's rig.yml that the workflow publishes, over ZeroMQ, for the live view (OpenRigs.LiveView, StreamDevices): data on TCP 5556, video on 5558, on every interface, from Start (in ready mode too). Camera-Overhead.Data as Camera-Overhead.video, 5 JPEG frames a second at 320 x 240; BehaviorBoard-Main.Data as BehaviorBoard-Main.encoder, the raw count from AnalogData, 10 a second; each rate and size can be changed in rig.yml under the device's liveView:. Also elapsed, seconds since the experiment folder (PathPrefix) appeared, once a second, and every 5 s liveview: this workflow, its commit, and the devices streamed and skipped and why. Every message carries RigId, the machine's name, and the session key: "ready" until the experiment folder exists, then its name, sub-&lt;SubjectId&gt;/ses-&lt;SessionId&gt;_&lt;start&gt;. Its ConfigRoot is the workflow's, as RigConfig's, RecordHarpDevices' and Logging &gt; RecordVideo's are, so --property:ConfigRoot moves all four. Last in the workflow, because it streams only subjects built before it. A port already in use (another workflow streaming) stops the workflow at Start with NetMQ's AddressAlreadyInUseException, before the camera is triggered.</Description>
+        <Description>Streams every device in this machine's rig.yml that the workflow publishes, over ZeroMQ, for the live view (OpenRigs.LiveView, StreamDevices): data on TCP 5556, video on 5558, on every interface, from Start (in ready mode too). Camera-Overhead.Data as Camera-Overhead.video, 5 JPEG frames a second at 320 x 240; BehaviorBoard-Main.Data as BehaviorBoard-Main.encoder, the raw count from AnalogData, 10 a second; each rate and size can be changed in rig.yml under the device's liveView:. Also elapsed, seconds since the experiment folder (PathPrefix) appeared, once a second, and every 5 s liveview: this workflow, its commit, and the devices streamed and skipped and why. Every message carries RigId, the machine's name, and the session key: "ready" until the experiment folder exists, then its name, sub-&lt;SubjectId&gt;/ses-&lt;SessionId&gt;_&lt;start&gt;. Its ConfigRoot is the lab's, set here and fed by no edge: an edge into it makes Bonsai build it before the devices, so it would stream nothing. Last in the workflow, because it streams only subjects built before it. A port already in use (another workflow streaming) stops the workflow at Start with NetMQ's AddressAlreadyInUseException, before the camera is triggered.</Description>
         <lv:ConfigRoot>C:\Coen-Lab-Local\RigConfigs</lv:ConfigRoot>
         <lv:DataPort>5556</lv:DataPort>
         <lv:VideoPort>5558</lv:VideoPort>
       </Expression>
       <Expression xsi:type="ExternalizedMapping">
-        <Property Name="ConfigRoot" Description="The root under which each machine has its own configuration directory, &lt;ConfigRoot&gt;\&lt;MACHINE-NAME&gt;\rig.yml, read by ReadLabRig (which publishes it to the camera's video writer), RecordHarpDevices and LiveView." />
+        <Property Name="ConfigRoot" Description="The root under which each machine has its own configuration directory, &lt;ConfigRoot&gt;\&lt;MACHINE-NAME&gt;\rig.yml, read by ReadLabRig (which publishes it to the camera's video writer) and RecordHarpDevices." />
       </Expression>
     </Nodes>
     <Edges>
@@ -305,7 +305,6 @@
       <Edge From="2" To="3" Label="Source1" />
       <Edge From="8" To="1" Label="Source1" />
       <Edge From="8" To="6" Label="Source1" />
-      <Edge From="8" To="7" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>
