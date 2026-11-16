@@ -12,13 +12,14 @@
                  xmlns:ext="clr-namespace:UclOpenCoenBehaviourBox;assembly=Extensions"
                  xmlns:orcl="clr-namespace:OpenRigs.Control;assembly=OpenRigs.Control"
                  xmlns:lv="clr-namespace:OpenRigs.LiveView;assembly=OpenRigs.LiveView"
-                 xmlns:mf="clr-namespace:OpenRigs.Manifest;assembly=OpenRigs.Manifest"
-                 xmlns:hd="clr-namespace:OpenRigs.HarpDevices;assembly=OpenRigs.HarpDevices"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
       <Expression xsi:type="ExternalizedMapping">
         <Property Name="Binning" DisplayName="Binning" Description="Camera binning, 1 for full resolution, in place of rig.yml's. Stays set for later runs until cleared. Blank: rig.yml's camera binning." />
+      </Expression>
+      <Expression xsi:type="ExternalizedMapping">
+        <Property Name="ConfigRoot" Description="The root under which each machine has its own configuration directory, &lt;ConfigRoot&gt;\&lt;MACHINE-NAME&gt;\rig.yml, read by ReadLabRig (which publishes it to the camera's video writer) and ExperimentRecords (RecordHarpDevices)." />
       </Expression>
       <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:ReadLabRig.bonsai">
         <ConfigRoot>C:\Coen-Lab-Local\RigConfigs</ConfigRoot>
@@ -185,8 +186,8 @@
         </Workflow>
       </Expression>
       <Expression xsi:type="GroupWorkflow">
-        <Name>Logging</Name>
-        <Description>What the box adds to the experiment folder (LogLabExperiment, before Hardware, makes it at Go with BonsaiData_Async, Settings_Rig and Settings_Experiment; the board and camera log themselves): RecordVideo counts the run, LogControlEvents adds the controller's events to BonsaiData_Async, RecordHarpDevices checks the board at Start and writes its record and register map, and ExperimentManifest records the experiment, completed when the run's frames are in.</Description>
+        <Name>Run</Name>
+        <Description>The run: once the experiment folder exists (PathPrefix, which LogLabExperiment makes at Go), RecordVideo counts the run length's frames from Camera-Overhead.Data and completes, and the run reports Finished, which ExperimentManifest records as completed. The board and camera log themselves; ExperimentRecords records the rest.</Description>
         <Workflow>
           <Nodes>
             <Expression xsi:type="SubscribeSubject">
@@ -194,7 +195,7 @@
             </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>RecordVideo</Name>
-              <Description>The run: subscribed only once PathPrefix exists (Take reads its Count at subscription), it takes the run length's worth of frames (RunLengthToFrames) and then completes, which completes the manifest's run and reports Finished. The camera piece records the video and its CSV itself, every frame from its first until the workflow stops.</Description>
+              <Description>The run: subscribed only once PathPrefix exists (Take reads its Count at subscription), it takes the run length's worth of frames (RunLengthToFrames) and then completes, which reports Finished. The camera piece records the video and its CSV itself, every frame from its first until the workflow stops.</Description>
               <Workflow>
                 <Nodes>
                   <Expression xsi:type="WorkflowInput">
@@ -254,18 +255,6 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:LogControlEvents.bonsai" />
-            <Expression xsi:type="hd:RecordHarpDevices">
-              <Name>RecordHarpDevices</Name>
-              <Description>Checks the Behavior board at Start and records it into each experiment, from rig.yml alone (OpenRigs.HarpDevices): for each Harp device in rig.yml whose data this workflow publishes (BehaviorBoard-Main.Data), the board on its portName must have its usbSerial, or the workflow stops saying which board is where; 0.5 s after the experiment folder (PathPrefix) appears it asks the board for a register dump on BehaviorBoard-Main.Commands, which the board&apos;s log records (Go comes long after HarpClockSet, so the dump is on the UTC clock); and it writes BehaviorBoard-Main\BehaviorBoard-Main_device.json (WhoAmI, hardware, firmware and core versions, Harp and USB serials) and BehaviorBoard-Main\BehaviorBoard-Main.yml, Harp.Behavior&apos;s register map (the Open Rigs logging spec, section 5). A board reporting another WhoAmI stops the workflow. ExperimentManifest expects both files (harp in its ExpectedFiles).</Description>
-              <hd:ConfigRoot>C:\Coen-Lab-Local\RigConfigs</hd:ConfigRoot>
-            </Expression>
-            <Expression xsi:type="mf:ExperimentManifest">
-              <Name>ExperimentManifest</Name>
-              <Description>Writes manifest.json into the experiment folder (OpenRigs.Manifest), finding PathPrefix itself: once when the folder appears (outcome running) and again when the run ends. Its input is the run, the frames recorded: completed when the run length&apos;s frames are written, error with a Watchdog&apos;s message, run.items the frame count; a controller stop is stopped, with the stop&apos;s reason. It records the machine, this repo&apos;s commit, Bonsai&apos;s command line (--property values), who launched it and sent Go (the parameters at Go are in Settings_Experiment), rig.yml&apos;s path and hash as read at Start (its settings are in Settings_Rig), and what the experiment must leave: a folder for each device in rig.yml this workflow publishes (BehaviorBoard-Main/, Camera-Overhead/), Settings/Settings_Rig_ and Settings/Settings_Experiment_, each settings file expected on its own, and (harp) for each Harp device in rig.yml the two files RecordHarpDevices writes, BehaviorBoard-Main_device.json and BehaviorBoard-Main.yml, which the overnight copy (jacuzzi-ingest&apos;s ingest-rig) alarms on if missing. A device folder holding only those two counts as empty. Errors on the board&apos;s logging chain do not reach it.</Description>
-              <mf:IngestScript>coen-behaviour-box</mf:IngestScript>
-              <mf:ExpectedFiles>auto;harp;Settings/Settings_Rig_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_</mf:ExpectedFiles>
-            </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:Count" />
             </Expression>
@@ -274,20 +263,21 @@
                 <orcl:Phase>Finished</orcl:Phase>
               </Combinator>
             </Expression>
-            <Expression xsi:type="ExternalizedMapping">
-              <Property Name="ConfigRoot" />
-            </Expression>
           </Nodes>
           <Edges>
             <Edge From="0" To="1" Label="Source1" />
             <Edge From="1" To="3" Label="Source1" />
             <Edge From="2" To="3" Label="Source2" />
-            <Edge From="3" To="6" Label="Source1" />
-            <Edge From="3" To="7" Label="Source1" />
-            <Edge From="7" To="8" Label="Source1" />
-            <Edge From="9" To="5" Label="Source1" />
+            <Edge From="3" To="4" Label="Source1" />
+            <Edge From="4" To="5" Label="Source1" />
           </Edges>
         </Workflow>
+      </Expression>
+      <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:ExperimentRecords.bonsai">
+        <ConfigRoot>C:\Coen-Lab-Local\RigConfigs</ConfigRoot>
+        <IngestScript>coen-behaviour-box</IngestScript>
+        <ExpectedFiles>auto;harp;Settings/Settings_Rig_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_</ExpectedFiles>
+        <TrialColumns />
       </Expression>
       <Expression xsi:type="lv:StreamDevices">
         <Name>LiveView</Name>
@@ -296,15 +286,12 @@
         <lv:DataPort>5556</lv:DataPort>
         <lv:VideoPort>5558</lv:VideoPort>
       </Expression>
-      <Expression xsi:type="ExternalizedMapping">
-        <Property Name="ConfigRoot" Description="The root under which each machine has its own configuration directory, &lt;ConfigRoot&gt;\&lt;MACHINE-NAME&gt;\rig.yml, read by ReadLabRig (which publishes it to the camera's video writer) and RecordHarpDevices." />
-      </Expression>
     </Nodes>
     <Edges>
-      <Edge From="0" To="5" Label="Source1" />
-      <Edge From="2" To="3" Label="Source1" />
-      <Edge From="8" To="1" Label="Source1" />
-      <Edge From="8" To="6" Label="Source1" />
+      <Edge From="0" To="6" Label="Source1" />
+      <Edge From="1" To="2" Label="Source1" />
+      <Edge From="1" To="8" Label="Source1" />
+      <Edge From="3" To="4" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>

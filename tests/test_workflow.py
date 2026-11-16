@@ -46,12 +46,26 @@ def test_no_spout_step_size_and_no_background_noise():
     assert "SpoutStepSize" not in TEXT and lint.BACKGROUND_NOISE not in TEXT
 
 
-def test_the_records_and_launch_settings_are_the_box_s_own():
-    # Not ExperimentRecords: the box's manifest takes the run (the frames recorded) as its input, for its outcome and
-    # run.items, which ExperimentRecords' manifest does not, and the box gives no rewards. Not LaunchSettings: the box has
-    # no task file, and its RunSettings carries the run length (16 Nov 2026).
-    assert lint.EXPERIMENT_RECORDS not in TEXT and lint.LAUNCH_SETTINGS not in TEXT
-    assert "<Name>RunSettings</Name>" in TEXT
+def test_the_records_are_experiment_records_and_write_what_the_logging_group_wrote():
+    # Pip, 16 Nov 2026: the box as the domes. The hand-built Logging group (LogControlEvents, RecordHarpDevices,
+    # ExperimentManifest) is lib's ExperimentRecords, and nothing written changed: the manifest's IngestScript and
+    # ExpectedFiles are the group's, no trial columns file (the box has no trial log; the group set none), the same
+    # devices, and no reward (the box has no valves). The manifest has no run input now, as the domes': completed comes
+    # from Run's Finished, and run.items is null (the frame count is the camera CSV's rows).
+    assert lint.experiment_records_problems(WORKFLOW) == [] and lint.reward_delivery_problems(WORKFLOW) == []
+    records = next(n for n in lint.ET.fromstring(TEXT.encode("utf-8")).iter(lint.W + "Expression") if n.get("Path") == lint.EXPERIMENT_RECORDS)
+    props = {c.tag.split("}")[-1]: (c.text or "") for c in records}
+    assert props == {"ConfigRoot": "C:\Coen-Lab-Local\RigConfigs", "IngestScript": "coen-behaviour-box", "TrialColumns": "",
+                     "ExpectedFiles": "auto;harp;Settings/Settings_Rig_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_"}
+    assert "<Name>RewardRequests</Name>" not in TEXT and lint.DELIVER_REWARD not in TEXT and lint.TASK_LOGS not in TEXT
+    assert TEXT.count("orcl:ReportPhase") == 1 and "<orcl:Phase>Finished</orcl:Phase>" in TEXT
+
+
+def test_launch_settings_wait_for_a_task_file():
+    # LaunchSettings needs the task file's TaskPath, and the box's one task setting, RunLengthMinutes, is a controller
+    # parameter that Settings_Experiment records: a task file would move it (a new Settings_Task file), so the box keeps
+    # its own RunSettings, with the run length, until Pip decides (16 Nov 2026).
+    assert lint.LAUNCH_SETTINGS not in TEXT and "<Name>RunSettings</Name>" in TEXT
 
 
 def test_the_layout_is_tracked():
