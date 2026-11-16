@@ -54,3 +54,8 @@ def test_the_box_keeps_no_rig_model_of_its_own():
     # The lab's LabRig (ReadLabRig) reads rig.yml, and lib's one template starts a new rig's (15 Nov 2026).
     assert not (ROOT / "src" / "DataSchemas").exists() and not (ROOT / "config" / "rig-template.yml").exists()
     assert "ext:" not in TEXT
+
+
+def test_the_camera_s_parameters_are_the_piece_s_own():
+    # CameraLiveControls declares CameraExposureUs and CameraGainDb (lib-open-rigs, 16 Nov 2026): the task names neither.
+    assert "<Name>CameraExposureUs</Name>" not in TEXT and "<Name>CameraGainDb</Name>" not in TEXT and "ExposureParameter" not in TEXT

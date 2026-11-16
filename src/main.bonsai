@@ -29,7 +29,7 @@
       </Expression>
       <Expression xsi:type="GroupWorkflow">
         <Name>Initialization</Name>
-        <Description>The experiment controller (OpenRigs.Control, ExperimentControl): SubjectId and SessionId from this node's properties or the command line (--property:SubjectId=...), the run length (whole minutes) and the camera's exposure and gain (CameraExposureUs and CameraGainDb, taken live by the camera, Hardware &gt; CameraLiveControls) as parameters the controller may change until Go, and the control endpoint the rig agent talks to (TCP 5561). The workflow starts into ready mode: board connected, camera armed and streaming, nothing recorded, waiting for Go. At Go the IDs and the run length are checked once and published as RunSettings, which logging waits for; if an ID is empty or the run length is not 1 to 9999, the workflow stops with "Sequence contains no elements." and nothing is recorded. Stop from the controller ends the workflow through ExperimentStoppedException, closing every file.</Description>
+        <Description>The experiment controller (OpenRigs.Control, ExperimentControl): SubjectId and SessionId from this node's properties or the command line (--property:SubjectId=...), the run length (whole minutes) and the camera's exposure and gain (CameraExposureUs and CameraGainDb, which Hardware &gt; CameraLiveControls declares and takes live) as parameters the controller may change until Go, and the control endpoint the rig agent talks to (TCP 5561). The workflow starts into ready mode: board connected, camera armed and streaming, nothing recorded, waiting for Go. At Go the IDs and the run length are checked once and published as RunSettings, which logging waits for; if an ID is empty or the run length is not 1 to 9999, the workflow stops with "Sequence contains no elements." and nothing is recorded. Stop from the controller ends the workflow through ExperimentStoppedException, closing every file.</Description>
         <Workflow>
           <Nodes>
             <Expression xsi:type="ExternalizedMapping">
@@ -48,19 +48,6 @@
                   <Minimum>1</Minimum>
                   <Maximum>9999</Maximum>
                   <WholeNumber>true</WholeNumber>
-                </Parameter>
-                <Parameter>
-                  <Name>CameraExposureUs</Name>
-                  <Value />
-                  <Description>Camera exposure in microseconds, taken by the camera live until Go. Starts at rig.yml's; at most the trigger period less 1,000 (19,000 at 50 Hz).</Description>
-                  <Minimum>100</Minimum>
-                </Parameter>
-                <Parameter>
-                  <Name>CameraGainDb</Name>
-                  <Value />
-                  <Description>Camera gain in dB, 0 to 5, taken by the camera live until Go. Starts at rig.yml's.</Description>
-                  <Minimum>0</Minimum>
-                  <Maximum>5</Maximum>
                 </Parameter>
               </Parameters>
               <Commands />
@@ -181,8 +168,6 @@
             </Expression>
             <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:CameraLiveControls.bonsai">
               <Camera>Camera-Overhead</Camera>
-              <ExposureParameter>CameraExposureUs</ExposureParameter>
-              <GainParameter>CameraGainDb</GainParameter>
               <Board>BehaviorBoard-Main</Board>
             </Expression>
             <Expression xsi:type="GroupWorkflow">

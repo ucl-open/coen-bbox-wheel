@@ -1,8 +1,12 @@
 # Backlog
 
+## 2026-11-16 CameraLiveControls declares its own parameters (lib-open-rigs, Devices .29)
+
+- `CameraExposureUs` and `CameraGainDb` are no longer declared on ExperimentControl, and the `CameraLiveControls` node drops its `ExposureParameter` and `GainParameter`: the piece declares both under those names (`DeclareControls`), shown at rig.yml's values with exposure capped at the trigger period less 1 ms, as before. `tests\test_workflow.py` holds the task to neither. app-rig-control's view `views\coen-behaviour-box.toml` names the same two parameters, so it is unchanged.
+
 ## 2026-11-16 Pieces declare their own commands and parameters (lib-open-rigs def14f6; Control .13, Devices .27)
 
-- Nothing to drop here (no piece's declaration on ExperimentControl); `tests\test_workflow.py` adds `declared_twice`. `CameraExposureUs` and `CameraGainDb` stay on ExperimentControl: `CameraLiveControls` takes its parameters by the names the task gives it.
+- Nothing to drop here (no piece's declaration on ExperimentControl); `tests\test_workflow.py` adds `declared_twice`. `CameraExposureUs` and `CameraGainDb` stayed on ExperimentControl then; see the next entry.
 
 ## 2026-11-16 lib-open-rigs 5ea5729 (Audio .11, Control .12, Core .19, Devices .22, Logging .15, Manifest .23, Video .17)
 
