@@ -1,5 +1,12 @@
 # Backlog
 
+## 2026-11-16 lib-open-rigs 5ea5729 (Audio .11, Control .12, Core .19, Devices .22, Logging .15, Manifest .23, Video .17)
+
+- The new lint finds nothing here: no PropertyMapping shares its source (`shared_mapping_problems`, in `hardware_problems`); no lick spout stage, so no `SpoutStepSize`; no speakers, so no `BackgroundNoise`. `tests\test_workflow.py` calls `spout_step_size_problems` and `background_noise_problems`.
+- Not adopted: `ExperimentRecords`, as the box's `ExperimentManifest` takes the run (the frames recorded) as its input for its outcome and `run.items`, which the include's manifest does not, and the box gives no rewards; `LaunchSettings`, as the box has no task file and its `RunSettings` carries the run length. `launch_settings_problems` and `experiment_records_problems` are not called.
+- `.github\workflows\checks.yml` (added in b295fd3, never run on GitHub) was run step by step on a fresh clone of this commit on 16 Nov 2026, with lib-open-rigs fetched from its local clone until it is pushed: Python tests, Bonsai setup and the workflow check.
+- Nothing written changes (`main.bonsai` is unchanged).
+
 ## Audit of the device-pieces cut (16 Nov 2026): not changed
 
 - Rig lists are registered in the lint: deliberate, documented and tested; an unregistered list fails loudly.

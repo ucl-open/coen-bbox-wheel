@@ -32,6 +32,20 @@ def test_the_workflow_declares_every_command_it_handles():
     assert lint.undeclared_commands(WORKFLOW) == []
 
 
+def test_no_spout_step_size_and_no_background_noise():
+    # No lick spout stage and no speakers: nothing declares SpoutStepSize or includes BackgroundNoise (16 Nov 2026).
+    assert lint.spout_step_size_problems(WORKFLOW) == [] and lint.background_noise_problems(WORKFLOW) == []
+    assert "SpoutStepSize" not in TEXT and lint.BACKGROUND_NOISE not in TEXT
+
+
+def test_the_records_and_launch_settings_are_the_box_s_own():
+    # Not ExperimentRecords: the box's manifest takes the run (the frames recorded) as its input, for its outcome and
+    # run.items, which ExperimentRecords' manifest does not, and the box gives no rewards. Not LaunchSettings: the box has
+    # no task file, and its RunSettings carries the run length (16 Nov 2026).
+    assert lint.EXPERIMENT_RECORDS not in TEXT and lint.LAUNCH_SETTINGS not in TEXT
+    assert "<Name>RunSettings</Name>" in TEXT
+
+
 def test_the_layout_is_tracked():
     assert lint.layout_problems(WORKFLOW) == []
 
