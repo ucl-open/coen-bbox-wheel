@@ -59,7 +59,7 @@ def test_the_records_are_experiment_records_and_write_what_the_logging_group_wro
     props = {c.tag.split("}")[-1]: (c.text or "") for c in records if c.tag != lint.W + "Description"}
     assert props == {"ConfigRoot": r"C:\Coen-Lab-Local\RigConfigs", "IngestScript": "coen-behaviour-box", "TrialColumns": "",
                      "ExpectedFiles": "auto;harp;Settings/Settings_Rig_;Settings/Settings_Task_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_"}
-    assert "<Name>RewardRequests</Name>" not in TEXT and lint.DELIVER_REWARD not in TEXT and lint.TASK_LOGS not in TEXT
+    assert "<Name>RewardRequests</Name>" not in TEXT and lint.REWARD_VALVE not in TEXT and lint.TASK_LOGS not in TEXT
     assert TEXT.count("orcl:ReportPhase") == 1 and "<orcl:Phase>Finished</orcl:Phase>" in TEXT
 
 
