@@ -15,12 +15,12 @@ def test_the_hardware_is_the_lab_s_pieces():
     assert lint.hardware_problems(WORKFLOW) == []
     assert [name for name, _ in lint.required_devices(WORKFLOW)] == ["BehaviorBoard-Main", "Camera-Overhead"]
     # The behaviour boxes' rig list (16 Nov 2026), which the box's preflight runs too: no piece of its own.
-    assert TEXT.count(f'Path="{lint.DEVICES}BBoxHardware.bonsai"') == 1
+    assert TEXT.count(f'Path="{lint.DEVICES}BehaviorBoxHardware.bonsai"') == 1
     assert {path for path, _ in lint.hardware(WORKFLOW)} - {lint.READ_LAB_RIG, lint.CAMERA_LIVE_CONTROLS} <= set(_rig_list())
 
 
 def _rig_list() -> list[str]:
-    nodes, _ = lint.nodes_and_edges(lint.child(lint.package_include(WORKFLOW, lint.DEVICES + "BBoxHardware.bonsai"), lint.W + "Workflow"))
+    nodes, _ = lint.nodes_and_edges(lint.child(lint.package_include(WORKFLOW, lint.DEVICES + "BehaviorBoxHardware.bonsai"), lint.W + "Workflow"))
     return [n.get("Path") for n in nodes if n.get("Path")]
 
 

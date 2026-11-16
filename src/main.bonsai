@@ -129,13 +129,13 @@
       <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:LogLabExperiment.bonsai" />
       <Expression xsi:type="GroupWorkflow">
         <Name>Hardware</Name>
-        <Description>The box's devices: the behaviour boxes' rig list (OpenRigs.Devices BBoxHardware: ReadyGate, Ready once the board's clock is set and the camera has sent a frame; the Behavior board BehaviorBoard-Main with its own clock and the running wheel on encoder port 2, WheelDistanceCm; the camera Camera-Overhead on the board's camera trigger, Binning, a launch property, in place of rig.yml's while set), each piece from its own entry in rig.yml and logging itself once the experiment folder exists; CameraExposureUs and CameraGainDb taken live by the camera (CameraLiveControls), and the editor's preview (Preview).</Description>
+        <Description>The box's devices: the behaviour boxes' rig list (OpenRigs.Devices BehaviorBoxHardware: ReadyGate, Ready once the board's clock is set and the camera has sent a frame; the Behavior board BehaviorBoard-Main with its own clock and the running wheel on encoder port 2, WheelDistanceCm; the camera Camera-Overhead on the board's camera trigger, Binning, a launch property, in place of rig.yml's while set), each piece from its own entry in rig.yml and logging itself once the experiment folder exists; CameraExposureUs and CameraGainDb taken live by the camera (CameraLiveControls), and the editor's preview (Preview).</Description>
         <Workflow>
           <Nodes>
             <Expression xsi:type="ExternalizedMapping">
               <Property Name="Binning" />
             </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BBoxHardware.bonsai" />
+            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BehaviorBoxHardware.bonsai" />
             <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:CameraLiveControls.bonsai">
               <Camera>Camera-Overhead</Camera>
               <Board>BehaviorBoard-Main</Board>
