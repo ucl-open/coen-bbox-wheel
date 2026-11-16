@@ -54,7 +54,7 @@ def test_the_records_are_experiment_records_and_write_what_the_logging_group_wro
     # ExpectedFiles are the group's, no trial columns file (the box has no trial log; the group set none), the same
     # devices, and no reward (the box has no valves). The manifest has no run input now, as the domes': completed comes
     # from TaskLogic's Finished, and run.items is null (the frame count is the camera CSV's rows).
-    assert lint.experiment_records_problems(WORKFLOW) == [] and lint.reward_delivery_problems(WORKFLOW) == []
+    assert lint.experiment_records_problems(WORKFLOW) == [] and lint.reward_problems(WORKFLOW) == []
     records = next(n for n in lint.ET.fromstring(TEXT.encode("utf-8")).iter(lint.W + "Expression") if n.get("Path") == lint.EXPERIMENT_RECORDS)
     props = {c.tag.split("}")[-1]: (c.text or "") for c in records}
     assert props == {"ConfigRoot": r"C:\Coen-Lab-Local\RigConfigs", "IngestScript": "coen-behaviour-box", "TrialColumns": "",
@@ -72,7 +72,15 @@ def test_the_launch_properties():
     # camera piece's Binning and the lab's ConfigRoot.
     top = lint.child(MAIN, lint.W + "Workflow").find(lint.W + "Nodes")
     exposed = {p.get("Name") for e in top if e.get(lint.XSI) == "ExternalizedMapping" for p in e}
-    assert exposed == {"SubjectId", "SessionId", "Binning", "ConfigRoot"}
+    assert exposed == {"SubjectId", "SessionId", "LaunchId", "Binning", "ConfigRoot"}
+
+
+def test_the_launch_id_reaches_the_controller():
+    assert lint.launch_id_problems(WORKFLOW) == []
+
+
+def test_every_device_is_opened_by_the_lab_s_pieces_and_the_live_view_is_last():
+    assert lint.hand_opened_devices(WORKFLOW) == [] and lint.live_view_problems(WORKFLOW) == []
 
 
 def test_every_config_root_is_the_lab_s():

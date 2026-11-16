@@ -21,19 +21,22 @@
       <Expression xsi:type="ExternalizedMapping">
         <Property Name="SubjectId" />
         <Property Name="SessionId" />
+        <Property Name="LaunchId" Description="The launcher's run id; the launch's own, from rig-control." />
       </Expression>
       <Expression xsi:type="GroupWorkflow">
         <Name>Initialization</Name>
-        <Description>The experiment controller (OpenRigs.Control, ExperimentControl): SubjectId and SessionId from this node's properties or the command line (--property:SubjectId=...), the run length (whole minutes) and the camera's exposure and gain (CameraExposureUs and CameraGainDb, which Hardware &gt; CameraLiveControls declares and takes live) as parameters the controller may change until Go, and the control endpoint the rig agent talks to (TCP 5561). The workflow starts into ready mode: board connected, camera armed and streaming, nothing recorded, waiting for Go. At Go the IDs and the run length are checked once and published as RunSettings, which logging waits for; if an ID is empty or the run length is not 1 to 9999, the workflow stops with "Sequence contains no elements." and nothing is recorded. Stop from the controller ends the workflow through ExperimentStoppedException, closing every file.</Description>
+        <Description>The experiment controller (OpenRigs.Control, ExperimentControl): SubjectId and SessionId from this node's properties or the command line (--property:SubjectId=...), the run length (whole minutes) and the camera's exposure and gain (CameraExposureUs and CameraGainDb, which Hardware &gt; CameraLiveControls declares and takes live) as parameters the controller may change until Go, and the control endpoint the rig agent talks to (TCP 5561). The workflow starts into ready mode: board connected, camera armed and streaming, nothing recorded, waiting for Go. At Go the IDs and the run length are published once as RunSettings, which logging waits for; the controller refuses Go if an ID is empty or the run length is not a whole number from 1 to 9999, so nothing is recorded. Stop from the controller ends the workflow through ExperimentStoppedException, closing every file.</Description>
         <Workflow>
           <Nodes>
             <Expression xsi:type="ExternalizedMapping">
               <Property Name="SubjectId" />
               <Property Name="SessionId" />
+              <Property Name="LaunchId" />
             </Expression>
             <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Control:ExperimentControl.bonsai">
               <SubjectId />
               <SessionId />
+              <LaunchId />
               <ControlEndpoint>@tcp://127.0.0.1:5561</ControlEndpoint>
               <Parameters>
                 <Parameter>
@@ -79,28 +82,6 @@
                 <rx:Count>1</rx:Count>
               </Combinator>
             </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Name>RunSettingsValid</Name>
-              <Description>Subject and session given, and the run length from 1 to 9999 minutes.</Description>
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>Item1.Trim().Length &gt; 0 &amp;&amp; Item2.Trim().Length &gt; 0 &amp;&amp; Item3 &gt;= 1 &amp;&amp; Item3 &lt;= 9999</scr:Expression>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                  <Edge From="1" To="2" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:First" />
-            </Expression>
             <Expression xsi:type="rx:AsyncSubject">
               <Name>RunSettings</Name>
             </Expression>
@@ -116,8 +97,6 @@
             <Edge From="8" To="9" Label="Source3" />
             <Edge From="9" To="10" Label="Source1" />
             <Edge From="10" To="11" Label="Source1" />
-            <Edge From="11" To="12" Label="Source1" />
-            <Edge From="12" To="13" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
