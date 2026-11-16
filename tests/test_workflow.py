@@ -56,7 +56,7 @@ def test_the_records_are_experiment_records_and_write_what_the_logging_group_wro
     # from TaskLogic's Finished, and run.items is null (the frame count is the camera CSV's rows).
     assert lint.experiment_records_problems(WORKFLOW) == [] and lint.reward_problems(WORKFLOW) == []
     records = next(n for n in lint.ET.fromstring(TEXT.encode("utf-8")).iter(lint.W + "Expression") if n.get("Path") == lint.EXPERIMENT_RECORDS)
-    props = {c.tag.split("}")[-1]: (c.text or "") for c in records}
+    props = {c.tag.split("}")[-1]: (c.text or "") for c in records if c.tag != lint.W + "Description"}
     assert props == {"ConfigRoot": r"C:\Coen-Lab-Local\RigConfigs", "IngestScript": "coen-behaviour-box", "TrialColumns": "",
                      "ExpectedFiles": "auto;harp;Settings/Settings_Rig_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_"}
     assert "<Name>RewardRequests</Name>" not in TEXT and lint.DELIVER_REWARD not in TEXT and lint.TASK_LOGS not in TEXT
