@@ -5,6 +5,7 @@ What is still to do, then what has been decided and why. Closed work, audit roun
 ## Open
 
 - Check on the rig (BBOX-1):
+  - **Blocked, needs a person (17 Nov 2026):** no trigger reaches the camera, so every Start ends "Camera-Overhead: no frame for 15 s after the camera trigger started" before Ready (sessions `chk-1117-ready`, `chk-1117-ready2`, and the older clone's `chk-1117-oldclone`; nothing recorded). The board triggers: driven directly on COM3 (Camera0Frequency 50, StartCameras 1) it sent 602 `Camera0Frame` events in 12 s. The camera works: 226 fps free-running, SuperSpeed, no incomplete frames. But the camera's `Line0` (`TriggerSource`, rising edge) read low on all 20,000 samples taken during that trigger. Check the trigger cable from the board's DO0 to the camera's GPIO (Line0 and its opto ground), then rerun these checks.
   - Quick Sync and `LogVideoFfmpeg` (`h264_qsv`): checked offline only. Run 30 minutes: 90,000 frames == 90,000 CSV rows, CPU, no dropped-frame warning.
   - Manifest outcomes seen: `completed`, `stopped`, `ended-early`. Still to see: `error` (a pulled trigger cable) and the overnight copy of a real experiment.
   - Wheel distance: 10 turns during a recording change the `Encoder` value by 10 x `countsPerRev`, unwrapped.
