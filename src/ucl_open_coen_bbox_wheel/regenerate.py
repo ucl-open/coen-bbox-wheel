@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pydantic
 
-import ucl_open_coen_behaviour_box.task
+import ucl_open_coen_bbox_wheel.task
 
 SCHEMA_ROOT = Path("./src/DataSchemas/")
 EXTENSIONS_ROOT = Path("./src/Extensions/")
@@ -35,7 +35,7 @@ def main():
     """Regenerate the task's JSON schema and Bonsai.Sgen C# classes from its pydantic model (the rig's are lib-open-rigs' OpenRigs.Devices.Rigs)."""
     SCHEMA_ROOT.mkdir(parents=True, exist_ok=True)
     EXTENSIONS_ROOT.mkdir(parents=True, exist_ok=True)
-    regenerate(ucl_open_coen_behaviour_box.task.UclOpenCoenBehaviourBoxTaskLogic, SCHEMA_ROOT / "ucl_open_coen_behaviour_box_task.json")
+    regenerate(ucl_open_coen_bbox_wheel.task.UclOpenCoenBboxWheelTaskLogic, SCHEMA_ROOT / "ucl_open_coen_bbox_wheel_task.json")
 
 
 if __name__ == "__main__":

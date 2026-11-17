@@ -1,10 +1,10 @@
 {
   "$defs": {
-    "UclOpenCoenBehaviourBoxTaskLogic": {
+    "UclOpenCoenBboxWheelTaskLogic": {
       "description": "Top-level task logic schema.",
       "properties": {
         "taskParameters": {
-          "$ref": "#/$defs/UclOpenCoenBehaviourBoxTaskParameters",
+          "$ref": "#/$defs/UclOpenCoenBboxWheelTaskParameters",
           "title": "TaskParameters"
         },
         "version": {
@@ -14,8 +14,8 @@
           "type": "string"
         },
         "name": {
-          "const": "UclOpenCoenBehaviourBox",
-          "default": "UclOpenCoenBehaviourBox",
+          "const": "UclOpenCoenBboxWheel",
+          "default": "UclOpenCoenBboxWheel",
           "description": "Name of the task",
           "title": "Name",
           "type": "string"
@@ -24,10 +24,10 @@
       "required": [
         "taskParameters"
       ],
-      "title": "UclOpenCoenBehaviourBoxTaskLogic",
+      "title": "UclOpenCoenBboxWheelTaskLogic",
       "type": "object"
     },
-    "UclOpenCoenBehaviourBoxTaskParameters": {
+    "UclOpenCoenBboxWheelTaskParameters": {
       "description": "Task params.",
       "properties": {
         "runLengthMinutes": {
@@ -39,10 +39,10 @@
           "type": "integer"
         }
       },
-      "title": "UclOpenCoenBehaviourBoxTaskParameters",
+      "title": "UclOpenCoenBboxWheelTaskParameters",
       "type": "object"
     }
   },
-  "$ref": "#/$defs/UclOpenCoenBehaviourBoxTaskLogic",
-  "title": "RootModel[UclOpenCoenBehaviourBoxTaskLogic]"
+  "$ref": "#/$defs/UclOpenCoenBboxWheelTaskLogic",
+  "title": "RootModel[UclOpenCoenBboxWheelTaskLogic]"
 }

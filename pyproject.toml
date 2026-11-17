@@ -3,8 +3,8 @@ requires = ["uv_build>=0.8.22"]
 build-backend = "uv_build"
 
 [project]
-name = "ucl-open-coen-behaviour-box"
-description = "The coen-behaviour-box workflow's environment and its checks against the lab's open-rigs rules."
+name = "ucl-open-coen-bbox-wheel"
+description = "The coen-bbox-wheel workflow's environment and its checks against the lab's open-rigs rules."
 authors = [ {name = "Pip Coen", email = "pipcoen@gmail.com"}]
 license = "BSD-3-Clause"
 requires-python = ">=3.11, <3.12"
@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.scripts]
-regenerate-schemas = "ucl_open_coen_behaviour_box.regenerate:main"
+regenerate-schemas = "ucl_open_coen_bbox_wheel.regenerate:main"
 
 [tool.ruff]
 line-length = 120
@@ -40,7 +40,7 @@ ignore-words-list = 'nd'
 required-version = '>=0.8.4'
 
 [tool.uv.sources]
-open-rigs = {git = "https://github.com/Coen-Lab/lib-open-rigs", rev = "70f09cb70196033e8414b9824aac7ef0e9a0a113"}
+open-rigs = {git = "https://github.com/Coen-Lab/lib-open-rigs", rev = "c40428102f3d84f20a2c14a13fc17b584d42f9f6"}
 
 [dependency-groups]
 dev = [

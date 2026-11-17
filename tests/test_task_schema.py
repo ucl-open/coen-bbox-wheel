@@ -10,12 +10,12 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from ucl_open_coen_behaviour_box.task import UclOpenCoenBehaviourBoxTaskLogic
+from ucl_open_coen_bbox_wheel.task import UclOpenCoenBboxWheelTaskLogic
 
 ROOT = Path(__file__).parent.parent
-TASK = ROOT / "config" / "task-box.yml"
-SCHEMA = ROOT / "src" / "DataSchemas" / "ucl_open_coen_behaviour_box_task.json"
-GENERATED = ROOT / "src" / "Extensions" / "UclOpenCoenBehaviourBoxTask.Generated.cs"
+TASK = ROOT / "config" / "task-bbox.yml"
+SCHEMA = ROOT / "src" / "DataSchemas" / "ucl_open_coen_bbox_wheel_task.json"
+GENERATED = ROOT / "src" / "Extensions" / "UclOpenCoenBboxWheelTask.Generated.cs"
 
 
 def task() -> dict:
@@ -33,7 +33,7 @@ def _closed(node):
 
 
 def test_the_task_file_validates_and_keeps_the_boxes_30_minutes():
-    model = UclOpenCoenBehaviourBoxTaskLogic.model_validate(task())
+    model = UclOpenCoenBboxWheelTaskLogic.model_validate(task())
     assert model.task_parameters.run_length_minutes == 30
     assert task() == {"taskParameters": {"runLengthMinutes": 30}}
 
@@ -41,7 +41,7 @@ def test_the_task_file_validates_and_keeps_the_boxes_30_minutes():
 @pytest.mark.parametrize("minutes", [0, -1, 10000, 1.5, "30 min", None])
 def test_a_run_length_that_is_not_a_whole_number_from_1_to_9999_is_refused(minutes):
     with pytest.raises(ValidationError):
-        UclOpenCoenBehaviourBoxTaskLogic.model_validate({"taskParameters": {"runLengthMinutes": minutes}})
+        UclOpenCoenBboxWheelTaskLogic.model_validate({"taskParameters": {"runLengthMinutes": minutes}})
     errors = list(jsonschema.Draft202012Validator(json.loads(SCHEMA.read_text(encoding="utf-8"))).iter_errors({"taskParameters": {"runLengthMinutes": minutes}}))
     assert errors
 
@@ -53,7 +53,7 @@ def test_the_schema_refuses_a_key_the_task_does_not_have(key):
 
 
 def test_the_committed_task_schema_is_the_model_s():
-    model = pydantic.RootModel[UclOpenCoenBehaviourBoxTaskLogic].model_json_schema(
+    model = pydantic.RootModel[UclOpenCoenBboxWheelTaskLogic].model_json_schema(
         by_alias=True, mode="serialization", union_format="primitive_type_array"
     )
     assert json.loads(SCHEMA.read_text(encoding="utf-8")) == json.loads(json.dumps(model))

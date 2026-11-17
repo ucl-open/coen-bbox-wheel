@@ -5,7 +5,7 @@
 //----------------------
 
 
-namespace UclOpenCoenBehaviourBoxTask
+namespace UclOpenCoenBboxWheelTask
 {
     #pragma warning disable // Disable all warnings
 
@@ -16,23 +16,23 @@ namespace UclOpenCoenBehaviourBoxTask
     [System.ComponentModel.DescriptionAttribute("Top-level task logic schema.")]
     [Bonsai.WorkflowElementCategoryAttribute(Bonsai.ElementCategory.Source)]
     [Bonsai.CombinatorAttribute(MethodName="Generate")]
-    public partial class UclOpenCoenBehaviourBoxTaskLogic
+    public partial class UclOpenCoenBboxWheelTaskLogic
     {
     
-        private UclOpenCoenBehaviourBoxTaskParameters _taskParameters;
+        private UclOpenCoenBboxWheelTaskParameters _taskParameters;
     
         private string _version;
     
         private string _name;
     
-        public UclOpenCoenBehaviourBoxTaskLogic()
+        public UclOpenCoenBboxWheelTaskLogic()
         {
-            _taskParameters = new UclOpenCoenBehaviourBoxTaskParameters();
+            _taskParameters = new UclOpenCoenBboxWheelTaskParameters();
             _version = "0.0.0-rc1";
-            _name = "UclOpenCoenBehaviourBox";
+            _name = "UclOpenCoenBboxWheel";
         }
     
-        protected UclOpenCoenBehaviourBoxTaskLogic(UclOpenCoenBehaviourBoxTaskLogic other)
+        protected UclOpenCoenBboxWheelTaskLogic(UclOpenCoenBboxWheelTaskLogic other)
         {
             _taskParameters = other._taskParameters;
             _version = other._version;
@@ -42,7 +42,7 @@ namespace UclOpenCoenBehaviourBoxTask
         [System.Xml.Serialization.XmlIgnoreAttribute()]
         [Newtonsoft.Json.JsonPropertyAttribute("taskParameters", Required=Newtonsoft.Json.Required.Always)]
         [YamlDotNet.Serialization.YamlMemberAttribute(Alias="taskParameters")]
-        public UclOpenCoenBehaviourBoxTaskParameters TaskParameters
+        public UclOpenCoenBboxWheelTaskParameters TaskParameters
         {
             get
             {
@@ -86,14 +86,14 @@ namespace UclOpenCoenBehaviourBoxTask
             }
         }
     
-        public System.IObservable<UclOpenCoenBehaviourBoxTaskLogic> Generate()
+        public System.IObservable<UclOpenCoenBboxWheelTaskLogic> Generate()
         {
-            return System.Reactive.Linq.Observable.Defer(() => System.Reactive.Linq.Observable.Return(new UclOpenCoenBehaviourBoxTaskLogic(this)));
+            return System.Reactive.Linq.Observable.Defer(() => System.Reactive.Linq.Observable.Return(new UclOpenCoenBboxWheelTaskLogic(this)));
         }
     
-        public System.IObservable<UclOpenCoenBehaviourBoxTaskLogic> Generate<TSource>(System.IObservable<TSource> source)
+        public System.IObservable<UclOpenCoenBboxWheelTaskLogic> Generate<TSource>(System.IObservable<TSource> source)
         {
-            return System.Reactive.Linq.Observable.Select(source, _ => new UclOpenCoenBehaviourBoxTaskLogic(this));
+            return System.Reactive.Linq.Observable.Select(source, _ => new UclOpenCoenBboxWheelTaskLogic(this));
         }
     
         protected virtual bool PrintMembers(System.Text.StringBuilder stringBuilder)
@@ -126,17 +126,17 @@ namespace UclOpenCoenBehaviourBoxTask
     [System.ComponentModel.DescriptionAttribute("Task params.")]
     [Bonsai.WorkflowElementCategoryAttribute(Bonsai.ElementCategory.Source)]
     [Bonsai.CombinatorAttribute(MethodName="Generate")]
-    public partial class UclOpenCoenBehaviourBoxTaskParameters
+    public partial class UclOpenCoenBboxWheelTaskParameters
     {
     
         private int _runLengthMinutes;
     
-        public UclOpenCoenBehaviourBoxTaskParameters()
+        public UclOpenCoenBboxWheelTaskParameters()
         {
             _runLengthMinutes = 30;
         }
     
-        protected UclOpenCoenBehaviourBoxTaskParameters(UclOpenCoenBehaviourBoxTaskParameters other)
+        protected UclOpenCoenBboxWheelTaskParameters(UclOpenCoenBboxWheelTaskParameters other)
         {
             _runLengthMinutes = other._runLengthMinutes;
         }
@@ -161,14 +161,14 @@ namespace UclOpenCoenBehaviourBoxTask
             }
         }
     
-        public System.IObservable<UclOpenCoenBehaviourBoxTaskParameters> Generate()
+        public System.IObservable<UclOpenCoenBboxWheelTaskParameters> Generate()
         {
-            return System.Reactive.Linq.Observable.Defer(() => System.Reactive.Linq.Observable.Return(new UclOpenCoenBehaviourBoxTaskParameters(this)));
+            return System.Reactive.Linq.Observable.Defer(() => System.Reactive.Linq.Observable.Return(new UclOpenCoenBboxWheelTaskParameters(this)));
         }
     
-        public System.IObservable<UclOpenCoenBehaviourBoxTaskParameters> Generate<TSource>(System.IObservable<TSource> source)
+        public System.IObservable<UclOpenCoenBboxWheelTaskParameters> Generate<TSource>(System.IObservable<TSource> source)
         {
-            return System.Reactive.Linq.Observable.Select(source, _ => new UclOpenCoenBehaviourBoxTaskParameters(this));
+            return System.Reactive.Linq.Observable.Select(source, _ => new UclOpenCoenBboxWheelTaskParameters(this));
         }
     
         protected virtual bool PrintMembers(System.Text.StringBuilder stringBuilder)
@@ -210,14 +210,14 @@ namespace UclOpenCoenBehaviourBoxTask
             return System.Reactive.Linq.Observable.Select(source, value => Newtonsoft.Json.JsonConvert.SerializeObject(value, formatting));
         }
 
-        public System.IObservable<string> Process(System.IObservable<UclOpenCoenBehaviourBoxTaskLogic> source)
+        public System.IObservable<string> Process(System.IObservable<UclOpenCoenBboxWheelTaskLogic> source)
         {
-            return Process<UclOpenCoenBehaviourBoxTaskLogic>(source);
+            return Process<UclOpenCoenBboxWheelTaskLogic>(source);
         }
 
-        public System.IObservable<string> Process(System.IObservable<UclOpenCoenBehaviourBoxTaskParameters> source)
+        public System.IObservable<string> Process(System.IObservable<UclOpenCoenBboxWheelTaskParameters> source)
         {
-            return Process<UclOpenCoenBehaviourBoxTaskParameters>(source);
+            return Process<UclOpenCoenBboxWheelTaskParameters>(source);
         }
     }
 
@@ -229,14 +229,14 @@ namespace UclOpenCoenBehaviourBoxTask
     [System.ComponentModel.DescriptionAttribute("Deserializes a sequence of JSON strings into data model objects.")]
     [System.ComponentModel.DefaultPropertyAttribute("Type")]
     [Bonsai.WorkflowElementCategoryAttribute(Bonsai.ElementCategory.Transform)]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskLogic>))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskParameters>))]
+    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBboxWheelTaskLogic>))]
+    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBboxWheelTaskParameters>))]
     public partial class DeserializeFromJson : Bonsai.Expressions.SingleArgumentExpressionBuilder
     {
     
         public DeserializeFromJson()
         {
-            Type = new Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskLogic>();
+            Type = new Bonsai.Expressions.TypeMapping<UclOpenCoenBboxWheelTaskLogic>();
         }
 
         public Bonsai.Expressions.TypeMapping Type { get; set; }
@@ -280,14 +280,14 @@ namespace UclOpenCoenBehaviourBoxTask
             });
         }
 
-        public System.IObservable<string> Process(System.IObservable<UclOpenCoenBehaviourBoxTaskLogic> source)
+        public System.IObservable<string> Process(System.IObservable<UclOpenCoenBboxWheelTaskLogic> source)
         {
-            return Process<UclOpenCoenBehaviourBoxTaskLogic>(source);
+            return Process<UclOpenCoenBboxWheelTaskLogic>(source);
         }
 
-        public System.IObservable<string> Process(System.IObservable<UclOpenCoenBehaviourBoxTaskParameters> source)
+        public System.IObservable<string> Process(System.IObservable<UclOpenCoenBboxWheelTaskParameters> source)
         {
-            return Process<UclOpenCoenBehaviourBoxTaskParameters>(source);
+            return Process<UclOpenCoenBboxWheelTaskParameters>(source);
         }
     }
 
@@ -299,14 +299,14 @@ namespace UclOpenCoenBehaviourBoxTask
     [System.ComponentModel.DescriptionAttribute("Deserializes a sequence of YAML strings into data model objects.")]
     [System.ComponentModel.DefaultPropertyAttribute("Type")]
     [Bonsai.WorkflowElementCategoryAttribute(Bonsai.ElementCategory.Transform)]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskLogic>))]
-    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskParameters>))]
+    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBboxWheelTaskLogic>))]
+    [System.Xml.Serialization.XmlIncludeAttribute(typeof(Bonsai.Expressions.TypeMapping<UclOpenCoenBboxWheelTaskParameters>))]
     public partial class DeserializeFromYaml : Bonsai.Expressions.SingleArgumentExpressionBuilder
     {
     
         public DeserializeFromYaml()
         {
-            Type = new Bonsai.Expressions.TypeMapping<UclOpenCoenBehaviourBoxTaskLogic>();
+            Type = new Bonsai.Expressions.TypeMapping<UclOpenCoenBboxWheelTaskLogic>();
         }
 
         public Bonsai.Expressions.TypeMapping Type { get; set; }

@@ -17,13 +17,13 @@ def test_the_hardware_is_the_lab_s_pieces():
     # the clock and the camera's first frame.
     assert lint.hardware_problems(WORKFLOW) == []
     assert [name for name, _ in lint.required_devices(WORKFLOW)] == ["BehaviorBoard-Main", "Camera-Overhead"]
-    # The behaviour boxes' rig list (16 Nov 2026), which the box's preflight runs too: no piece of its own.
-    assert TEXT.count(f'Path="{lint.DEVICES}BehaviorBoxHardware.bonsai"') == 1
+    # The behaviour boxes' rig list, which the box's preflight runs too: no piece of its own.
+    assert TEXT.count(f'Path="{lint.DEVICES}BBoxHardware.bonsai"') == 1
     assert {path for path, _ in lint.hardware(WORKFLOW)} - {lint.READ_LAB_RIG, lint.CAMERA_LIVE_CONTROLS} <= set(_rig_list())
 
 
 def _rig_list() -> list[str]:
-    nodes, _ = lint.nodes_and_edges(lint.child(lint.package_include(WORKFLOW, lint.DEVICES + "BehaviorBoxHardware.bonsai"), lint.W + "Workflow"))
+    nodes, _ = lint.nodes_and_edges(lint.child(lint.package_include(WORKFLOW, lint.DEVICES + "BBoxHardware.bonsai"), lint.W + "Workflow"))
     return [n.get("Path") for n in nodes if n.get("Path")]
 
 
@@ -49,7 +49,7 @@ def test_no_spout_step_size_and_no_background_noise():
 
 
 def test_the_records_are_experiment_records_and_write_what_the_logging_group_wrote():
-    # Pip, 16 Nov 2026: the box as the domes. The hand-built Logging group (LogControlEvents, RecordHarpDevices,
+    # The box as the domes. The hand-built Logging group (LogControlEvents, RecordHarpDevices,
     # ExperimentManifest) is lib's ExperimentRecords, and nothing written changed: the manifest's IngestScript and
     # ExpectedFiles are the group's, no trial columns file (the box has no trial log; the group set none), the same
     # devices, and no reward (the box has no valves). The manifest has no run input now, as the domes': completed comes
@@ -57,8 +57,8 @@ def test_the_records_are_experiment_records_and_write_what_the_logging_group_wro
     assert lint.experiment_records_problems(WORKFLOW) == [] and lint.reward_problems(WORKFLOW) == []
     records = next(n for n in lint.ET.fromstring(TEXT.encode("utf-8")).iter(lint.W + "Expression") if n.get("Path") == lint.EXPERIMENT_RECORDS)
     props = {c.tag.split("}")[-1]: (c.text or "") for c in records if c.tag != lint.W + "Description"}
-    assert props == {"ConfigRoot": r"C:\Coen-Lab-Local\RigConfigs", "IngestScript": "coen-behaviour-box", "TrialColumns": "",
-                     "ExpectedFiles": "auto;harp;Settings/Settings_Rig_;Settings/Settings_Task_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_"}
+    assert props == {"ConfigRoot": r"C:\Coen-Lab-Local\RigConfigs", "IngestScript": "coen-bbox-wheel", "TrialColumns": "",
+                     "ExpectedFiles": "auto;harp;Settings/Settings_Rig_;Settings/Settings_Task_;Settings/Settings_Experiment_;WorkflowData/WorkflowData_Events_"}
     assert "<Name>RewardRequests</Name>" not in TEXT and lint.REWARD_VALVE not in TEXT and lint.TASK_LOGS not in TEXT
     assert TEXT.count("orcl:ReportPhase") == 1 and "<orcl:Phase>Finished</orcl:Phase>" in TEXT
 
@@ -111,23 +111,23 @@ def test_the_launch_settings_are_lib_s_with_the_box_s_task_file():
     # Pip, 16 Nov 2026: the run length is the task file's, read through lib's LaunchSettings (TaskPath), as the domes'.
     assert lint.launch_settings_problems(WORKFLOW) == []
     node = next(n for n in MAIN.iter(lint.W + "Expression") if n.get("Path") == lint.LAUNCH_SETTINGS)
-    assert node.findtext(lint.W + "TaskPath") == "..\\config\\task-box.yml"
+    assert node.findtext(lint.W + "TaskPath") == "..\\config\\task-bbox.yml"
 
 
 def test_the_run_length_is_the_task_file_s_and_no_controller_parameter():
     assert "RunLengthMinutes" not in re.sub(r"<Description>.*?</Description>", "", TEXT, flags=re.S).replace("TaskParameters.RunLengthMinutes", "")
     assert "orcl:ParameterValue" not in TEXT and not re.search(r"<Parameter>\s*<Name>RunLength", TEXT)
-    assert "<Name>RunSettings</Name>" not in TEXT  # LaunchSettings publishes it
+    assert "<Name>ExperimentIds</Name>" not in TEXT  # LaunchSettings publishes it
     group = next(e for e in MAIN.iter(lint.W + "Expression") if e.findtext(lint.W + "Name") == "RunLengthToFrames")
     text = _xml(group)
     assert "<Name>TaskConfig</Name>" in text and "Item1.TaskParameters.RunLengthMinutes * 60.0" in text
 
 
 def test_the_task_file_is_read_at_go_into_task_config():
-    # ExperimentGo zipped with TaskFilePath (the path is known from Start, the read waits for Go), deserialized as the generated model.
+    # ExperimentGo zipped with TaskPath (the path is known from Start, the read waits for Go), deserialized as the generated model.
     group = next(e for e in MAIN.iter(lint.W + "Expression") if e.findtext(lint.W + "Name") == "TaskFile")
     text = _xml(group)
-    for part in ("<Name>ExperimentGo</Name>", "<Name>TaskFilePath</Name>", "core:ReadTextFile", "UclOpenCoenBehaviourBoxTaskLogic", "<Name>TaskConfig</Name>"):
+    for part in ("<Name>ExperimentGo</Name>", "<Name>TaskPath</Name>", "core:ReadTextFile", "UclOpenCoenBboxWheelTaskLogic", "<Name>TaskConfig</Name>"):
         assert part in text
     assert TEXT.count("<Name>TaskConfig</Name>") == 3  # published once, read by the run length and by Settings_Task
 

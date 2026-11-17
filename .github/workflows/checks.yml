@@ -1,6 +1,6 @@
 # The checks run before a push (README), on every push to main: the Python tests, then Bonsai set up as a rig sets it
 # up (.bonsai\Setup.ps1) and the lab's workflow check (scripts\check-workflow.ps1: main.bonsai built with Bonsai's
-# builders against the lab's rig template). The box has one task file (config/task-box.yml), the checks run it, and there are no extension tests.
+# builders against the lab's rig template). The box has one task file (config/task-bbox.yml), the checks run it, and there are no extension tests.
 
 name: Checks
 

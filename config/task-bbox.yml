@@ -1,6 +1,6 @@
-# yaml-language-server: $schema=../src/DataSchemas/ucl_open_coen_behaviour_box_task.json
+# yaml-language-server: $schema=../src/DataSchemas/ucl_open_coen_bbox_wheel_task.json
 # The task file: rig-control copies it at launch and again at Go with the form's edits, and the workflow reads the copy
 # (TaskPath) at Go and logs it as Settings_Task. From the editor, the workflow reads this file as it is.
-# tests\test_task_schema.py checks it against the pydantic model (src\ucl_open_coen_behaviour_box\task.py), which also says what each field does.
+# tests\test_task_schema.py checks it against the pydantic model (src\ucl_open_coen_bbox_wheel\task.py), which also says what each field does.
 taskParameters:
   runLengthMinutes: 30        # How long to record, in whole minutes (1 to 9999), counted in camera frames from the experiment folder's creation, just after Go

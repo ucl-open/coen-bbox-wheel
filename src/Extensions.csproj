@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- The task model's generated classes (Extensions\UclOpenCoenBehaviourBoxTask.Generated.cs, from `uv run regenerate-schemas`), and no
+  <!-- The task model's generated classes (Extensions\UclOpenCoenBboxWheelTask.Generated.cs, from `uv run regenerate-schemas`), and no
        other C#. lib-open-rigs' check-workflow.ps1 builds it and loads its Extensions.dll, YamlDotNet.dll and Newtonsoft.Json.dll from the build output. -->
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>

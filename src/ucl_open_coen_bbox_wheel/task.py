@@ -1,4 +1,4 @@
-"""The task file's schema: config/task-box.yml, which rig-control copies at launch and again at Go with the form's edits;
+"""The task file's schema: config/task-bbox.yml, which rig-control copies at launch and again at Go with the form's edits;
 the workflow reads the copy (TaskPath) at Go and logs it as Settings_Task. The box's one task setting is how long to record."""
 
 from typing import Literal
@@ -7,10 +7,10 @@ from open_rigs.core.task import Task
 from pydantic import Field
 from swc.aeon.schema import BaseSchema
 
-from ucl_open_coen_behaviour_box import __semver__
+from ucl_open_coen_bbox_wheel import __semver__
 
 
-class UclOpenCoenBehaviourBoxTaskParameters(BaseSchema):
+class UclOpenCoenBboxWheelTaskParameters(BaseSchema):
     """Task params."""
 
     run_length_minutes: int = Field(
@@ -21,9 +21,9 @@ class UclOpenCoenBehaviourBoxTaskParameters(BaseSchema):
     )
 
 
-class UclOpenCoenBehaviourBoxTaskLogic(Task):
+class UclOpenCoenBboxWheelTaskLogic(Task):
     """Top-level task logic schema."""
 
     version: Literal[__semver__] = __semver__
-    name: Literal["UclOpenCoenBehaviourBox"] = Field(default="UclOpenCoenBehaviourBox", description="Name of the task")
-    task_parameters: UclOpenCoenBehaviourBoxTaskParameters
+    name: Literal["UclOpenCoenBboxWheel"] = Field(default="UclOpenCoenBboxWheel", description="Name of the task")
+    task_parameters: UclOpenCoenBboxWheelTaskParameters

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WorkflowBuilder Version="2.9.0"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                 xmlns:task="clr-namespace:UclOpenCoenBehaviourBoxTask;assembly=Extensions"
+                 xmlns:task="clr-namespace:UclOpenCoenBboxWheelTask;assembly=Extensions"
                  xmlns:core="clr-namespace:OpenRigs.Core;assembly=OpenRigs.Core"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
                  xmlns:dev="clr-namespace:OpenRigs.Devices;assembly=OpenRigs.Devices"
@@ -18,18 +18,18 @@
         <Property Name="ConfigRoot" Description="The root under which each machine has its own configuration directory, &lt;ConfigRoot&gt;\&lt;MACHINE-NAME&gt;\rig.yml, read by ReadLabRig (which publishes it to the camera's video writer) and ExperimentRecords (RecordHarpDevices)." />
       </Expression>
       <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:ReadLabRig.bonsai">
-        <Description>This machine's rig.yml (ConfigRoot\MACHINE\rig.yml) read once into the lab rig model: RigConfigs, RigFile, RigConfigDirectory and ConfigRoot, which every device piece reads. First, before anything that reads them.</Description>
+        <Description>This machine's rig.yml (ConfigRoot\MACHINE\rig.yml) read once into the lab rig model: RigConfigs, RigFile and ConfigRoot, which every device piece reads. First, before anything that reads them.</Description>
         <ConfigRoot>C:\Coen-Lab-Local\RigConfigs</ConfigRoot>
       </Expression>
       <Expression xsi:type="ExternalizedMapping">
         <Property Name="SubjectId" />
         <Property Name="SessionId" />
         <Property Name="LaunchId" Description="The launcher's run id; the launch's own, from rig-control." />
-        <Property Name="TaskPath" Description="The task file: rig-control's copy of the one chosen at launch, read at Go with the form's edits; from the editor, config\task-box.yml." />
+        <Property Name="TaskPath" Description="The task file: rig-control's copy of the one chosen at launch, read at Go with the form's edits; from the editor, config\task-bbox.yml." />
       </Expression>
       <Expression xsi:type="GroupWorkflow">
         <Name>Initialization</Name>
-        <Description>The experiment controller (OpenRigs.Control, ExperimentControl): SubjectId, SessionId and LaunchId (the launcher's run id, in the manifest) from this node's properties or the command line (--property:SubjectId=...), the camera's exposure and gain (Camera-Overhead.ExposureUs and Camera-Overhead.GainDb, which Hardware &gt; CameraLiveControls declares and takes live) as parameters the controller may change until Go, and the control endpoint the rig agent talks to (TCP 5561). The workflow starts into ready mode: board connected, camera armed and streaming, nothing recorded, waiting for Go. LaunchSettings (OpenRigs.Control) publishes SubjectId and TaskFilePath (TaskPath) at Start and RunSettings (SubjectId, SessionId) at Go, which logging waits for; the controller refuses Go if an ID is empty, so nothing is recorded. TaskFile reads the task file at Go, with the form's edits, as TaskConfig (the run length is its taskParameters.runLengthMinutes, not a controller parameter). Stop from the controller ends the workflow through ExperimentStoppedException, closing every file.</Description>
+        <Description>The experiment controller (OpenRigs.Control, ExperimentControl): SubjectId, SessionId and LaunchId (the launcher's run id, in the manifest) from this node's properties or the command line (--property:SubjectId=...), the camera's exposure and gain (Camera-Overhead.ExposureUs and Camera-Overhead.GainDb, which Hardware &gt; CameraLiveControls declares and takes live) as parameters the controller may change until Go, and the control endpoint the rig agent talks to (TCP 5561). The workflow starts into ready mode: board connected, camera armed and streaming, nothing recorded, waiting for Go. LaunchSettings (OpenRigs.Control) publishes SubjectId and TaskPath (TaskPath) at Start and ExperimentIds (SubjectId, SessionId) at Go, which logging waits for; the controller refuses Go if an ID is empty, so nothing is recorded. TaskFile reads the task file at Go, with the form's edits, as TaskConfig (the run length is its taskParameters.runLengthMinutes, not a controller parameter). Stop from the controller ends the workflow through ExperimentStoppedException, closing every file.</Description>
         <Workflow>
           <Nodes>
             <Expression xsi:type="ExternalizedMapping">
@@ -48,15 +48,15 @@
               <Commands />
             </Expression>
             <Expression xsi:type="ExternalizedMapping">
-              <Property Name="TaskPath" Description="The task file: rig-control's copy of the one chosen at launch, read at Go with the form's edits; from the editor, config\task-box.yml." />
+              <Property Name="TaskPath" Description="The task file: rig-control's copy of the one chosen at launch, read at Go with the form's edits; from the editor, config\task-bbox.yml." />
             </Expression>
             <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Control:LaunchSettings.bonsai">
               <SubjectId />
-              <TaskPath>..\config\task-box.yml</TaskPath>
+              <TaskPath>..\config\task-bbox.yml</TaskPath>
             </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>TaskFile</Name>
-              <Description>Reads the task file (TaskPath) at Go, as rig-control wrote it with the form's edits, into TaskConfig (the generated UclOpenCoenBehaviourBoxTaskLogic: taskParameters.runLengthMinutes). A file the deserializer refuses stops the workflow at Go, before anything is recorded.</Description>
+              <Description>Reads the task file (TaskPath) at Go, as rig-control wrote it with the form's edits, into TaskConfig (the generated UclOpenCoenBboxWheelTaskLogic: taskParameters.runLengthMinutes). A file the deserializer refuses stops the workflow at Go, before anything is recorded.</Description>
               <Workflow>
                 <Nodes>
                   <Expression xsi:type="SubscribeSubject">
@@ -68,7 +68,7 @@
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
-                    <Name>TaskFilePath</Name>
+                    <Name>TaskPath</Name>
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Zip" />
@@ -80,7 +80,7 @@
                     <Combinator xsi:type="core:ReadTextFile" />
                   </Expression>
                   <Expression xsi:type="task:DeserializeFromYaml">
-                    <task:Type xsi:type="TypeMapping" TypeArguments="task:UclOpenCoenBehaviourBoxTaskLogic" />
+                    <task:Type xsi:type="TypeMapping" TypeArguments="task:UclOpenCoenBboxWheelTaskLogic" />
                   </Expression>
                   <Expression xsi:type="rx:AsyncSubject">
                     <Name>TaskConfig</Name>
@@ -106,16 +106,16 @@
           </Edges>
         </Workflow>
       </Expression>
-      <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:LogLabExperiment.bonsai" />
+      <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:ExperimentLogs.bonsai" />
       <Expression xsi:type="GroupWorkflow">
         <Name>Hardware</Name>
-        <Description>The box's devices: the behaviour boxes' rig list (OpenRigs.Devices BehaviorBoxHardware: ReadyGate, Ready once the board's clock is set and the camera has sent a frame; the Behavior board BehaviorBoard-Main with its own clock and the running wheel on encoder port 2, WheelDistanceCm; the camera Camera-Overhead on the board's camera trigger, Binning, a launch property, in place of rig.yml's while set), each piece from its own entry in rig.yml and logging itself once the experiment folder exists; Camera-Overhead.ExposureUs and Camera-Overhead.GainDb taken live by the camera (CameraLiveControls), and the editor's preview (Preview).</Description>
+        <Description>The box's devices: the behaviour boxes' rig list (OpenRigs.Devices BBoxHardware: ReadyGate, Ready once the board's clock is set and the camera has sent a frame; the Behavior board BehaviorBoard-Main with its own clock and the running wheel on encoder port 2, WheelDistanceCm; the camera Camera-Overhead on the board's camera trigger, Binning, a launch property, in place of rig.yml's while set), each piece from its own entry in rig.yml and logging itself once the experiment folder exists; Camera-Overhead.ExposureUs and Camera-Overhead.GainDb taken live by the camera (CameraLiveControls), and the editor's preview (Preview).</Description>
         <Workflow>
           <Nodes>
             <Expression xsi:type="ExternalizedMapping">
               <Property Name="Binning" />
             </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BehaviorBoxHardware.bonsai" />
+            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BBoxHardware.bonsai" />
             <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:CameraLiveControls.bonsai">
               <Camera>Camera-Overhead</Camera>
               <Board>BehaviorBoard-Main</Board>
@@ -166,7 +166,7 @@
       </Expression>
       <Expression xsi:type="GroupWorkflow">
         <Name>TaskLogic</Name>
-        <Description>The run: once the experiment folder exists (PathPrefix, which LogLabExperiment makes at Go), RunLength counts the task file's run length (taskParameters.runLengthMinutes, TaskConfig) in frames from Camera-Overhead.Data and completes, and the run reports Finished, which ExperimentManifest records as completed. Settings_Task is the task file as read at Go, as JSON (LogDataSchema). The board and camera log themselves; ExperimentRecords records the rest.</Description>
+        <Description>The run: once the experiment folder exists (PathPrefix, which ExperimentLogs makes at Go), RunLength counts the task file's run length (taskParameters.runLengthMinutes, TaskConfig) in frames from Camera-Overhead.Data and completes, and the run reports Finished, which ExperimentManifest records as completed. Settings_Task is the task file as read at Go, as JSON (LogDataSchema). The board and camera log themselves; ExperimentRecords records the rest.</Description>
         <Workflow>
           <Nodes>
             <Expression xsi:type="SubscribeSubject">
@@ -280,10 +280,10 @@
         </Workflow>
       </Expression>
       <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:ExperimentRecords.bonsai">
-        <Description>The controller's events (LogControlEvents), every Harp device in rig.yml checked at Start and recorded (RecordHarpDevices), and manifest.json (ExperimentManifest: the machine, this repo's commit, who launched it and sent Go, rig.yml and every file it names by hash ({RigFiles}), and what the experiment must leave: a folder for each device in rig.yml, the Harp device records (harp), the rig, task and experiment settings files and BonsaiData (Async)). Last but LiveView, as it finds each device by the subjects published before it.</Description>
+        <Description>The controller's events (LogControlEvents), every Harp device in rig.yml checked at Start and recorded (RecordHarpDevices), and manifest.json (ExperimentManifest: the machine, this repo's commit, who launched it and sent Go, rig.yml and every file it names by hash ({RigFiles}), and what the experiment must leave: a folder for each device in rig.yml, the Harp device records (harp), the rig, task and experiment settings files and WorkflowData_Events). Last but LiveView, as it finds each device by the subjects published before it.</Description>
         <ConfigRoot>C:\Coen-Lab-Local\RigConfigs</ConfigRoot>
-        <IngestScript>coen-behaviour-box</IngestScript>
-        <ExpectedFiles>auto;harp;Settings/Settings_Rig_;Settings/Settings_Task_;Settings/Settings_Experiment_;BonsaiData/BonsaiData_Async_</ExpectedFiles>
+        <IngestScript>coen-bbox-wheel</IngestScript>
+        <ExpectedFiles>auto;harp;Settings/Settings_Rig_;Settings/Settings_Task_;Settings/Settings_Experiment_;WorkflowData/WorkflowData_Events_</ExpectedFiles>
         <TrialColumns />
       </Expression>
       <Expression xsi:type="lv:StreamDevices">
