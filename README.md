@@ -1,6 +1,6 @@
 # coen-bbox-wheel
 
-Acquisition for the Coen Lab behaviour box: a triggered Spinnaker camera recorded with FFmpeg, frame times paired with Harp triggers, and the Harp board logged raw. Experiment files follow av-dome's (`ActiveExperiments`) layout. The hardware (assembly, parts) lives in [Coen-Lab/hw-behaviour-box](https://github.com/Coen-Lab/hw-behaviour-box).
+Acquisition for the Coen Lab behaviour box: a triggered Spinnaker camera recorded with FFmpeg, frame times paired with Harp triggers, and the Harp board logged raw. Experiment files follow the lab's experiment record (lib's ExperimentRecords, as the dome tasks). The hardware (assembly, parts) lives in [Coen-Lab/hw-behaviour-box](https://github.com/Coen-Lab/hw-behaviour-box).
 
 Generated from the [open-rigs](https://github.com/open-rigs/open-rigs) template (`.copier-answers.yml` records the commit).
 
