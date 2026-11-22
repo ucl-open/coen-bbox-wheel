@@ -54,7 +54,7 @@ The box's one task setting, how long to record, is the task file's, `config\task
 
 ## Layout
 
-The workflow's top level follows the open-rigs layout: `ReadLabRig` (this machine's `rig.yml`, lib-open-rigs' lab rig model), `Initialization` (the controller, the launch's settings and the task file read at Go), `ExperimentLogs` (the experiment folder at Go, `WorkflowData_Events`, the settings files; before `Hardware`, as every device's log waits for its folder), `Hardware` (the Ready gate, the board, its clock, the wheel, the camera and its trigger, the camera's live exposure and gain, the editor's preview), `TaskLogic` (the run length's frames, then Finished; `Settings_Task`), `ExperimentRecords` (lib-open-rigs' shared records, as the dome tasks': the controller's events, the board's record and the manifest) and `LiveView` (streams every device; below).
+The workflow's top level follows the open-rigs layout: `ReadLabRig` (this machine's `rig.yml`, lib-open-rigs' lab rig model), `Initialization` (the controller, the launch's settings and the task file read at Go), `ExperimentLogs` (the experiment folder at Go, `WorkflowData_Events`, the settings files; before `Hardware`, as every device's log waits for its folder), `Hardware` (the Ready gate, the board, its clock, the wheel, the camera and its trigger, the camera's live exposure and gain, the editor's preview, then `LabClockReady`, the lab clock checked at Start), `TaskLogic` (the run length's frames, then Finished; `Settings_Task`), `ExperimentRecords` (lib-open-rigs' shared records, as the dome tasks': the controller's events, the board's record and the manifest) and `LiveView` (streams every device; below).
 
 ## Shared Blocks
 
@@ -69,6 +69,7 @@ The box's hardware, run settings and records come from the lab fork (lib-open-ri
 | `LogDataSchema` | `Settings_Task`: the task file as JSON, once the experiment folder exists | `OpenRigs.Logging:LogDataSchema.bonsai` |
 | `ReportPhase` | Finished, once the run length's frames are in | `OpenRigs.Control` operator |
 | `ExperimentLogs` | The experiment folder at Go (`PathPrefix`) and the settings files | `OpenRigs.Logging:ExperimentLogs.bonsai` |
+| `LabClockReady` | The lab clock checked at Start, a Ready stage (`LabClockChecked`, in `BBoxHardware`'s `WorkflowStages`) | `OpenRigs.Logging:LabClockReady.bonsai` |
 | `BBoxHardware` | The behaviour boxes' rig list: `ReadyGate`, the board with its own clock and the wheel, the camera and its trigger | `OpenRigs.Devices:BBoxHardware.bonsai` |
 | `CameraLiveControls` | `Camera-Overhead.ExposureUs` and `Camera-Overhead.GainDb`, set on the open camera | `OpenRigs.Devices:CameraLiveControls.bonsai` |
 | `CameraTrigger` | The camera's trigger frequency, from the wiring line that names it, for the run length's frames (the task file's) | `OpenRigs.Devices` operator |

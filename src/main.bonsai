@@ -115,7 +115,9 @@
             <Expression xsi:type="ExternalizedMapping">
               <Property Name="Binning" />
             </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BBoxHardware.bonsai" />
+            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:BBoxHardware.bonsai">
+              <WorkflowStages>LabClockChecked</WorkflowStages>
+            </Expression>
             <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Devices:CameraLiveControls.bonsai">
               <Camera>Camera-Overhead</Camera>
               <Board>BehaviorBoard-Main</Board>
@@ -157,6 +159,9 @@
                   <Edge From="4" To="5" Label="Source1" />
                 </Edges>
               </Workflow>
+            </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="OpenRigs.Logging:LabClockReady.bonsai">
+              <Description>The lab clock checked at Start (OpenRigs.Logging LabClockReady): a clock that disagrees with the lab's stops the workflow before Ready; it announces LabClockChecked, which ReadyGate waits for (WorkflowStages).</Description>
             </Expression>
           </Nodes>
           <Edges>

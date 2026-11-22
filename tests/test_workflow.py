@@ -17,9 +17,9 @@ def test_the_hardware_is_the_lab_s_pieces():
     # the clock and the camera's first frame.
     assert lint.hardware_problems(WORKFLOW) == []
     assert [name for name, _ in lint.required_devices(WORKFLOW)] == ["BehaviorBoard-Main", "Camera-Overhead"]
-    # The behaviour boxes' rig list, which the box's preflight runs too: no piece of its own.
+    # The behaviour boxes' rig list, which the box's preflight runs too: no piece of its own; LabClockReady, the clock checked at Start, follows it.
     assert TEXT.count(f'Path="{lint.DEVICES}BBoxHardware.bonsai"') == 1
-    assert {path for path, _ in lint.hardware(WORKFLOW)} - {lint.READ_LAB_RIG, lint.CAMERA_LIVE_CONTROLS} <= set(_rig_list())
+    assert {path for path, _ in lint.hardware(WORKFLOW)} - {lint.READ_LAB_RIG, lint.CAMERA_LIVE_CONTROLS, lint.LAB_CLOCK_READY} <= set(_rig_list())
 
 
 def _rig_list() -> list[str]:
