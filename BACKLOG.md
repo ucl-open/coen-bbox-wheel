@@ -30,3 +30,13 @@ What is still to do, then what has been decided and why. Closed work, audit roun
 
 - Box run length not moved back to a controller parameter: the task file is the one place.
 - Box task-file layout not made to mirror the domes: lib `TaskLogs` needs `TrialRow` and the box has no trials; `ReadTextFile` and `ReadAllText` differ on purpose.
+
+## Audit 2026-11-22 (/audit-rigs, pipeline)
+
+Changed (e1ece27): the README points at the lab's experiment record, not the retired av-dome layout (P3Q-L5).
+
+Deferred: none.
+
+Not changed, do not raise again without new information:
+
+- None in this repo this round.
