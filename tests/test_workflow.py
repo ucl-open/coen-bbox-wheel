@@ -57,7 +57,7 @@ def test_the_records_are_experiment_records_and_write_what_the_logging_group_wro
     assert lint.experiment_records_problems(WORKFLOW) == [] and lint.reward_problems(WORKFLOW) == []
     records = next(n for n in lint.ET.fromstring(TEXT.encode("utf-8")).iter(lint.W + "Expression") if n.get("Path") == lint.EXPERIMENT_RECORDS)
     props = {c.tag.split("}")[-1]: (c.text or "") for c in records if c.tag != lint.W + "Description"}
-    assert props == {"ConfigRoot": r"C:\Coen-Lab-Local\RigConfigs", "IngestScript": "coen-bbox-wheel", "TrialColumns": "",
+    assert props == {"IngestScript": "coen-bbox-wheel", "TrialColumns": "",  # ConfigRoot is ReadLabRig's (lib PR #3)
                      "ExpectedFiles": "auto;harp;Settings/Settings_Rig_;Settings/Settings_Task_;Settings/Settings_Experiment_;WorkflowData/WorkflowData_Events_"}
     assert "<Name>RewardRequests</Name>" not in TEXT and lint.REWARD_VALVE not in TEXT and lint.TASK_LOGS not in TEXT
     assert TEXT.count("orcl:ReportPhase") == 1 and "<orcl:Phase>Finished</orcl:Phase>" in TEXT
